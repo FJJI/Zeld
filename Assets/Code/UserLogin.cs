@@ -27,6 +27,7 @@ public class UserLogin : MonoBehaviour
         LoginButton.onClick.AddListener(() => Login(UserNameInput.text, PasswordInput.text));
         SignupButton.onClick.AddListener(() => DisplayForm());
         CreateButton.onClick.AddListener(() => Signup(UserNameInput.text, PasswordInput.text, RePasswordInput.text, EmailInput.text));
+        BackButton.onClick.AddListener(() => DisplayLogin());
         
     }
 
@@ -38,6 +39,18 @@ public class UserLogin : MonoBehaviour
         RePassWordLabel.gameObject.SetActive(true);
         EmailLabel.gameObject.SetActive(true);
         EmailInput.gameObject.SetActive(true);
+        SignupButton.gameObject.SetActive(false);
+        LoginButton.gameObject.SetActive(false);
+    }
+
+    public void DisplayLogin()
+    {
+        CreateButton.gameObject.SetActive(false);
+        BackButton.gameObject.SetActive(false);
+        RePasswordInput.gameObject.SetActive(false);
+        RePassWordLabel.gameObject.SetActive(false);
+        EmailLabel.gameObject.SetActive(false);
+        EmailInput.gameObject.SetActive(false);
         SignupButton.gameObject.SetActive(true);
         LoginButton.gameObject.SetActive(true);
     }
@@ -47,6 +60,11 @@ public class UserLogin : MonoBehaviour
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(re_password) || string.IsNullOrEmpty(email))
         {
             //Error handling
+            return;
+        }
+
+        if (password != re_password)
+        {
             return;
         }
 
@@ -105,8 +123,13 @@ public class UserLogin : MonoBehaviour
                 user.DisplayName, user.UserId);
 
             PlayerPrefs.SetString("LoginUser", user != null ? user.Email : "Unknown");
-            SceneManager.LoadScene("LoginResults");
+            //SceneManager.LoadScene("LoginResults");
         });
+    }
+
+    public void GoogleAuth()
+    {
+        
     }
 
 
