@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "918699900954",
+    "firebase_url": "https://zeld-e907d.firebaseio.com",
+    "project_id": "zeld-e907d",
+    "storage_bucket": "zeld-e907d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:918699900954:android:85761459a66d759da451a3",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.Zeld"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "918699900954-nfr31dmc33ttf3saos5rl4b16vef39fn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMCgIO2v53mHMYVkHEi9I18gcNdWvkmOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "918699900954-nfr31dmc33ttf3saos5rl4b16vef39fn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
