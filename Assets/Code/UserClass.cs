@@ -15,6 +15,8 @@
         this.username = username;
         this.email = email;
         this.password = password;
+        this.wins = wins;
+        this.loses = loses;
 
     }
 }

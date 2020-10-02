@@ -11,6 +11,7 @@ using System;
 
 public class UserLogin : MonoBehaviour
 {
+    public string logged_key;
     private FirebaseAuth auth;
     private DatabaseReference reference;
     private FirebaseDatabase dbInstance;
@@ -24,7 +25,7 @@ public class UserLogin : MonoBehaviour
 
         Debug.Log("started");
         auth = FirebaseAuth.DefaultInstance;
-
+        logged_key = null;
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://zeld-e907d.firebaseio.com/");
         reference = FirebaseDatabase.DefaultInstance.RootReference;
         dbInstance = FirebaseDatabase.DefaultInstance;
@@ -112,8 +113,7 @@ public class UserLogin : MonoBehaviour
         string json = JsonUtility.ToJson(new_user);
         reference.Child("users").Push().SetRawJsonValueAsync(json);
         ErrorText.text = "User Created";
-
-        SceneManager.LoadScene("Main Menu");
+        DisplayLogin();
 
     }
 
@@ -130,7 +130,8 @@ public class UserLogin : MonoBehaviour
 
     public void Login(string username, string password)
     {
-        dbInstance.GetReference("users").GetValueAsync().ContinueWith(task => {
+        dbInstance.GetReference("users").GetValueAsync().ContinueWith(task =>
+        {
             if (task.IsFaulted)
             {
                 // Handle the error...
@@ -143,14 +144,21 @@ public class UserLogin : MonoBehaviour
                     IDictionary dictUser = (IDictionary)user.Value;
                     if (dictUser["username"].ToString() == username && dictUser["password"].ToString() == password)
                     {
-                        Debug.Log("" + user.Key + dictUser["username"] + " - " + dictUser["email"] + " - " + dictUser["password"]);
-                        SceneManager.LoadScene("Main Menu");
-                        break;
+                        Debug.Log("" + user.Key + "-" + dictUser["username"] + " - " + dictUser["email"] + " - " + dictUser["password"]);
+                        logged_key = user.Key;
+                        
                     }
                 }
-                
+
             }
         });
+        Wait(2, () => {
+            Debug.Log(logged_key);
+            SceneManager.LoadScene("Main Menu");
+        });
+        
+
+
     }
 
     public void GoogleAuth()
@@ -158,6 +166,15 @@ public class UserLogin : MonoBehaviour
         
     }
 
+    public void Wait(float seconds, Action action)
+    {
+        StartCoroutine(_wait(seconds, action));
+    }
 
+    IEnumerator _wait(float time, Action callback)
+    {
+        yield return new WaitForSeconds(time);
+        callback();
+    }
 
 }
