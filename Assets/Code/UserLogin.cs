@@ -18,6 +18,7 @@ public class UserLogin : MonoBehaviour
     public InputField UserNameInput, PasswordInput, RePasswordInput, EmailInput;
     public Button SignupButton, LoginButton, CreateButton, BackButton;
     public Text ErrorText, RePassWordLabel, EmailLabel;
+    public bool mail, uname;
 
 
     void Start()
@@ -26,6 +27,8 @@ public class UserLogin : MonoBehaviour
         Debug.Log("started");
         auth = FirebaseAuth.DefaultInstance;
         logged_key = null;
+        mail = false;
+        uname = false;
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://zeld-e907d.firebaseio.com/");
         reference = FirebaseDatabase.DefaultInstance.RootReference;
         dbInstance = FirebaseDatabase.DefaultInstance;
@@ -40,7 +43,7 @@ public class UserLogin : MonoBehaviour
         LoginButton.onClick.AddListener(() => Login(UserNameInput.text, PasswordInput.text));
         SignupButton.onClick.AddListener(() => DisplayForm());
         CreateButton.onClick.AddListener(() => Signup(UserNameInput.text, PasswordInput.text, RePasswordInput.text, EmailInput.text));
-        BackButton.onClick.AddListener(() => DisplayLogin());
+        BackButton.onClick.AddListener(() => DisplayLogin(" "));
         
     }
 
@@ -56,7 +59,7 @@ public class UserLogin : MonoBehaviour
         LoginButton.gameObject.SetActive(false);
     }
 
-    public void DisplayLogin()
+    public void DisplayLogin(string message)
     {
         CreateButton.gameObject.SetActive(false);
         BackButton.gameObject.SetActive(false);
@@ -66,7 +69,7 @@ public class UserLogin : MonoBehaviour
         EmailInput.gameObject.SetActive(false);
         SignupButton.gameObject.SetActive(true);
         LoginButton.gameObject.SetActive(true);
-        ErrorText.text = "";
+        ErrorText.text = message;
     }
 
     public void Signup(string username, string password, string re_password, string email)
@@ -98,22 +101,36 @@ public class UserLogin : MonoBehaviour
                     IDictionary dictUser = (IDictionary)user.Value;
                     if (dictUser["username"].ToString() == username)
                     {
-                        return;
+                        uname = true;
+                        break;
                     }
                     if (dictUser["email"].ToString() == email)
                     {
-                        return;
+                        mail = true;
+                        break;
                     }
                 }
             }
         });
-        
 
-        User new_user = new User(username, email, password, 0, 0);
-        string json = JsonUtility.ToJson(new_user);
-        reference.Child("users").Push().SetRawJsonValueAsync(json);
-        ErrorText.text = "User Created";
-        DisplayLogin();
+        Wait(2, () => {
+
+            if (uname) {
+                ErrorText.text = "Username Already Exists";
+                return; 
+            }
+
+            if (mail) {
+                ErrorText.text = "Email Already in the System";
+            }
+
+            User new_user = new User(username, email, password, 0, 0);
+            string json = JsonUtility.ToJson(new_user);
+            reference.Child("users").Push().SetRawJsonValueAsync(json);
+
+            DisplayLogin("User Created");
+        });
+        
 
     }
 
@@ -146,6 +163,7 @@ public class UserLogin : MonoBehaviour
                     {
                         Debug.Log("" + user.Key + "-" + dictUser["username"] + " - " + dictUser["email"] + " - " + dictUser["password"]);
                         logged_key = user.Key;
+                        break;
                         
                     }
                 }
@@ -154,7 +172,10 @@ public class UserLogin : MonoBehaviour
         });
         Wait(2, () => {
             Debug.Log(logged_key);
-            SceneManager.LoadScene("Main Menu");
+            if (logged_key != null)
+            {
+                SceneManager.LoadScene("Main Menu");
+            }
         });
         
 

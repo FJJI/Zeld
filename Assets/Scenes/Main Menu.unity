@@ -1132,6 +1132,7 @@ GameObject:
   - component: {fileID: 1709730172}
   - component: {fileID: 1709730171}
   - component: {fileID: 1709730170}
+  - component: {fileID: 1709730174}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1223,6 +1224,24 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1709730174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1709730169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72d75291d53bbcf41989ba48b46fe1a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RoomCode: {fileID: 352992179}
+  FriendListButton: {fileID: 965121831}
+  ProfileButton: {fileID: 1252675253}
+  CreateRoomButton: {fileID: 528827173}
+  AccessRoomButton: {fileID: 1541937966}
+  logged_key: 
 --- !u!1 &1717895113
 GameObject:
   m_ObjectHideFlags: 0
