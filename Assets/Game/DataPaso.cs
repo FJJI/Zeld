@@ -11,7 +11,7 @@ public class DataPaso : MonoBehaviour
         if (dataPaso == null)
         {
             dataPaso = this;
-            DontDestroyOnLoad(Gameobject);
+            DontDestroyOnLoad(gameObject);
         }
         else if (dataPaso != this)
         {

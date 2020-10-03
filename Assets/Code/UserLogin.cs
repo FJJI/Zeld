@@ -18,7 +18,7 @@ public class UserLogin : MonoBehaviour
     public InputField UserNameInput, PasswordInput, RePasswordInput, EmailInput;
     public Button SignupButton, LoginButton, CreateButton, BackButton;
     public Text ErrorText, RePassWordLabel, EmailLabel;
-    public bool mail, uname;
+    public bool mail, uname, just_created;
 
 
     void Start()
@@ -29,6 +29,7 @@ public class UserLogin : MonoBehaviour
         logged_key = null;
         mail = false;
         uname = false;
+        just_created = false;
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://zeld-e907d.firebaseio.com/");
         reference = FirebaseDatabase.DefaultInstance.RootReference;
         dbInstance = FirebaseDatabase.DefaultInstance;
@@ -127,8 +128,8 @@ public class UserLogin : MonoBehaviour
             User new_user = new User(username, email, password, 0, 0);
             string json = JsonUtility.ToJson(new_user);
             reference.Child("users").Push().SetRawJsonValueAsync(json);
-
-            DisplayLogin("User Created");
+            just_created = true;
+            Login(username, password);
         });
         
 
@@ -163,6 +164,10 @@ public class UserLogin : MonoBehaviour
                     {
                         Debug.Log("" + user.Key + "-" + dictUser["username"] + " - " + dictUser["email"] + " - " + dictUser["password"]);
                         logged_key = user.Key;
+                        PlayerPrefs.SetString("Username", dictUser["username"].ToString());
+                        PlayerPrefs.SetString("Email", dictUser["email"].ToString());
+                        PlayerPrefs.SetInt("Wins", int.Parse(dictUser["wins"].ToString()));
+                        PlayerPrefs.SetInt("Loses", int.Parse(dictUser["loses"].ToString()));
                         break;
                         
                     }
@@ -174,6 +179,14 @@ public class UserLogin : MonoBehaviour
             Debug.Log(logged_key);
             if (logged_key != null)
             {
+                if (just_created)
+                {
+                    string owner = logged_key;
+                    string json = JsonUtility.ToJson(owner);
+                    reference.Child("friendLists").Child(logged_key).SetRawJsonValueAsync(json);
+                    reference.Child("requestLists").Child(logged_key).SetRawJsonValueAsync(json);
+                }
+                PlayerPrefs.SetString("UID", logged_key);
                 SceneManager.LoadScene("Main Menu");
             }
         });
