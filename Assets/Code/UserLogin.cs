@@ -73,7 +73,7 @@ public class UserLogin : MonoBehaviour
         ErrorText.text = message;
     }
 
-    public void Signup(string username, string password, string re_password, string email)
+    public async void Signup(string username, string password, string re_password, string email)
     {
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(re_password) || string.IsNullOrEmpty(email))
         {
@@ -89,7 +89,7 @@ public class UserLogin : MonoBehaviour
 
         ErrorText.text = "";
         
-        dbInstance.GetReference("users").GetValueAsync().ContinueWith(task => {
+        await dbInstance.GetReference("users").GetValueAsync().ContinueWith(task => {
             if (task.IsFaulted)
             {
                 // Handle the error...
@@ -114,24 +114,23 @@ public class UserLogin : MonoBehaviour
             }
         });
 
-        Wait(2, () => {
 
-            if (uname) {
-                ErrorText.text = "Username Already Exists";
-                return; 
-            }
+        if (uname)
+        {
+            ErrorText.text = "Username Already Exists";
+            return;
+        }
 
-            if (mail) {
-                ErrorText.text = "Email Already in the System";
-            }
+        if (mail)
+        {
+            ErrorText.text = "Email Already in the System";
+        }
 
-            User new_user = new User(username, email, password, 0, 0);
-            string json = JsonUtility.ToJson(new_user);
-            reference.Child("users").Push().SetRawJsonValueAsync(json);
-            just_created = true;
-            Login(username, password);
-        });
-        
+        User new_user = new User(username, email, password, 0, 0);
+        string json = JsonUtility.ToJson(new_user);
+        await reference.Child("users").Push().SetRawJsonValueAsync(json);
+        just_created = true;
+        Login(username, password);
 
     }
 
@@ -146,9 +145,9 @@ public class UserLogin : MonoBehaviour
         ErrorText.text = "";
     }
 
-    public void Login(string username, string password)
+    public async void Login(string username, string password)
     {
-        dbInstance.GetReference("users").GetValueAsync().ContinueWith(task =>
+        await dbInstance.GetReference("users").GetValueAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
             {
@@ -175,23 +174,20 @@ public class UserLogin : MonoBehaviour
 
             }
         });
-        Wait(2, () => {
-            Debug.Log(logged_key);
-            if (logged_key != null)
-            {
-                if (just_created)
-                {
-                    string owner = logged_key;
-                    string json = JsonUtility.ToJson(owner);
-                    reference.Child("friendLists").Child(logged_key).SetRawJsonValueAsync(json);
-                    reference.Child("requestLists").Child(logged_key).SetRawJsonValueAsync(json);
-                }
-                PlayerPrefs.SetString("UID", logged_key);
-                SceneManager.LoadScene("Main Menu");
-            }
-        });
-        
 
+        Debug.Log(logged_key);
+        if (logged_key != null)
+        {
+            if (just_created)
+            {
+                string owner = logged_key;
+                string json = JsonUtility.ToJson(owner);
+                await reference.Child("friendLists").Child(logged_key).SetRawJsonValueAsync(json);
+                await reference.Child("requestLists").Child(logged_key).SetRawJsonValueAsync(json);
+            }
+            PlayerPrefs.SetString("UID", logged_key);
+            SceneManager.LoadScene("Main Menu");
+        }
 
     }
 
