@@ -8,7 +8,7 @@
     public Friend(string fn, string fi, int wins, int loses)
     {
         this.friend_name = fn;
-        this.friend_name = fi;
+        this.friend_id = fi;
         this.wins = wins;
         this.loses = loses;
     }

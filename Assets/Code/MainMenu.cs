@@ -12,7 +12,7 @@ using System;
 public class MainMenu : MonoBehaviour
 {
     public InputField RoomCode, FriendToAdd;
-    public Button FriendListButton, ProfileButton, CreateRoomButton, AccessRoomButton, RequestsButton, FriendsButton, AddFriend, BackButton;
+    public Button FriendListButton, ProfileButton, CreateRoomButton, AccessRoomButton, RequestsButton, FriendsButton, AddFriend, BackButton, LogoutButton;
     public GameObject FriendsView, RequestsView;
     public GameObject FriendRow, RequestRow;
     public Transform FriendContent, RequestContent;
@@ -42,12 +42,18 @@ public class MainMenu : MonoBehaviour
         FriendsButton.onClick.AddListener(() => DisplayFriends(logged_key));
         RequestsButton.onClick.AddListener(() => DisplayRequests(logged_key));
         BackButton.onClick.AddListener(() => Back());
-
+        AddFriend.onClick.AddListener(() => AddFriends(logged_key, FriendToAdd.text));
+        LogoutButton.onClick.AddListener(() => Logout());
 
     }
 
     public async void DisplayFriends(string key)
     {
+        while (FriendContent.transform.childCount > 0)
+        {
+            Destroy(FriendContent.transform.GetChild(0).gameObject);
+        }
+        friendsL = new List<Friend>();
         FriendListButton.gameObject.SetActive(false);
         ProfileButton.gameObject.SetActive(false);
         CreateRoomButton.gameObject.SetActive(false);
@@ -55,9 +61,12 @@ public class MainMenu : MonoBehaviour
         RoomCode.gameObject.SetActive(false);
         RequestsButton.gameObject.SetActive(true);
         FriendsButton.gameObject.SetActive(true);
+        AddFriend.gameObject.SetActive(true);
         BackButton.gameObject.SetActive(true);
         FriendToAdd.gameObject.SetActive(true);
         FriendsView.gameObject.SetActive(true);
+        RequestsView.gameObject.SetActive(false);
+        LogoutButton.gameObject.SetActive(false);
         // obtenemos todos los amigos de la lista
         //Primero Consultamos a la Base de datos por nuestra lista de amigos
         await dbInstance.GetReference("friendLists").Child(key).Child("friends").GetValueAsync().ContinueWith(task => {
@@ -68,7 +77,7 @@ public class MainMenu : MonoBehaviour
                 // Vemos si es que tenemos amigos
                 rows = snapshot.ChildrenCount;
                 // Si hay amigos, los agregamos a una lista que usaremos para las rondas.
-                if (rows != 1)
+                if (rows > 0)
                 {
                     foreach (DataSnapshot friend in snapshot.Children)
                     {
@@ -83,10 +92,11 @@ public class MainMenu : MonoBehaviour
         // Aqui empezamos el ciclo para agregar cada row al FriendsView
         for (int i = 0; i < friendsL.Count; i++)
         {
+            string f_id = friendsL[i].friend_id;
             GameObject SpawnedItem = Instantiate(FriendRow);
             SpawnedItem.transform.SetParent(FriendContent, false);
             SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = friendsL[i].friend_name;
-            SpawnedItem.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => DeleteFriend(logged_key,friendsL[i].friend_id));
+            SpawnedItem.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => DeleteFriend(logged_key, f_id, SpawnedItem));
 
         }
 
@@ -94,11 +104,16 @@ public class MainMenu : MonoBehaviour
 
     public async void DisplayRequests(string key)
     {
+        while (RequestContent.transform.childCount > 0)
+        {
+            Destroy(RequestContent.transform.GetChild(0).gameObject);
+        }
+        requestsL = new List<Request>();
         FriendsView.gameObject.SetActive(false);
         RequestsView.gameObject.SetActive(true);
         // obtenemos todas las solicitudes recibidas en nuestra lista de requests
         //Primero Consultamos a la Base de datos por nuestra lista de solicitudes
-        await dbInstance.GetReference("requestLists").Child(key).GetValueAsync().ContinueWith(task => {
+        await dbInstance.GetReference("requestLists").Child(key).Child("requests").GetValueAsync().ContinueWith(task => {
             if (task.IsFaulted) { }
             else if (task.IsCompleted)
             {
@@ -106,8 +121,8 @@ public class MainMenu : MonoBehaviour
                 // Vemos si es que tenemos solicitudes
                 rows = snapshot.ChildrenCount;
                 // Si hay solicitudes, las agregamos a una lista que usaremos para las rondas.
-                if (rows != 1)
-                {
+                if (rows > 0)
+                {                 
                     foreach (DataSnapshot request in snapshot.Children)
                     {
                         IDictionary dictRequest = (IDictionary)request.Value;
@@ -126,11 +141,15 @@ public class MainMenu : MonoBehaviour
         
         for (int i = 0; i < requestsL.Count; i++)
         {
+            string f_name = requestsL[i].from_name;
+            string f_id = requestsL[i].from_id;
             GameObject SpawnedItem = Instantiate(RequestRow);
             SpawnedItem.transform.SetParent(RequestContent, false);
             SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = requestsL[i].from_name;
-            SpawnedItem.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => AcceptFriend(logged_key, requestsL[i].from_name, requestsL[i].from_id));
-            SpawnedItem.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => RefuseRequest(logged_key,  requestsL[i].from_id));
+            SpawnedItem.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() => 
+                AcceptFriend(logged_key, SpawnedItem.transform.GetChild(0).GetComponent<Text>().text, f_id, SpawnedItem));
+            SpawnedItem.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+                RefuseRequest(logged_key, f_id, SpawnedItem));
         }
 
     }
@@ -152,7 +171,6 @@ public class MainMenu : MonoBehaviour
                 {
                     found = true;
                     IDictionary dictUser = (IDictionary)snapshot.Value;
-                    target = dictUser["username"].ToString();
                     Debug.Log("founded");
                 }
 
@@ -166,33 +184,37 @@ public class MainMenu : MonoBehaviour
         else
         {
             ErrorMessage.text = "Resquest sended";
-            Request request = new Request(logged_key, target, friend_code);
+            Request request = new Request(logged_key, PlayerPrefs.GetString("UserName"), friend_code);
             string json = JsonUtility.ToJson(request);
-            await reference.Child("requestLists").Child(friend_code).Child(logged_key).SetRawJsonValueAsync(json);
+            await reference.Child("requestLists").Child(friend_code).Child("requests").Child(logged_key).SetRawJsonValueAsync(json);
 
         }
 
     }
 
-    public async void AcceptFriend(string key, string name, string friend_key)
+    public async void AcceptFriend(string key, string name, string friend_key, GameObject spwaned)
     {
-        await reference.Child("requestLists").Child(key).Child(friend_key).RemoveValueAsync();
+        await reference.Child("requestLists").Child(key).Child("requests").Child(friend_key).RemoveValueAsync();
         Friend friend1 = new Friend(name, friend_key, 0, 0); //friend in my list.
-        Friend friend2 = new Friend(PlayerPrefs.GetString("Username"), key, 0, 0); //friend in his list.
+        Friend friend2 = new Friend(PlayerPrefs.GetString("UserName"), key, 0, 0); //friend in his list.
         string json = JsonUtility.ToJson(friend1);
         await reference.Child("friendLists").Child(key).Child("friends").Child(friend_key).SetRawJsonValueAsync(json);
         json = JsonUtility.ToJson(friend2);
         await reference.Child("friendLists").Child(friend_key).Child("friends").Child(key).SetRawJsonValueAsync(json);
+        Destroy(spwaned);
     }
 
-    public void RefuseRequest(string key, string friend_key)
+    public async void RefuseRequest(string key, string friend_key, GameObject spawned)
     {
-        reference.Child("requestLists").Child(key).Child(friend_key).RemoveValueAsync();
+        await reference.Child("requestLists").Child(key).Child("requests").Child(friend_key).RemoveValueAsync();
+        Destroy(spawned);
     }
 
-    public void DeleteFriend(string key, string friend_key)
+    public async void DeleteFriend(string key, string friend_key, GameObject spawned)
     {
-
+        await reference.Child("friendLists").Child(key).Child("friends").Child(friend_key).RemoveValueAsync();
+        await reference.Child("friendLists").Child(friend_key).Child("friends").Child(key).RemoveValueAsync();
+        Destroy(spawned);
     }
 
     public void Back()
@@ -202,16 +224,26 @@ public class MainMenu : MonoBehaviour
         CreateRoomButton.gameObject.SetActive(true);
         AccessRoomButton.gameObject.SetActive(true);
         RoomCode.gameObject.SetActive(true);
-        FriendToAdd.gameObject.SetActive(false);
         RequestsButton.gameObject.SetActive(false);
         FriendsButton.gameObject.SetActive(false);
         BackButton.gameObject.SetActive(false);
         FriendToAdd.gameObject.SetActive(false);
+        AddFriend.gameObject.SetActive(false);
+        FriendsView.gameObject.SetActive(false);
+        RequestsView.gameObject.SetActive(false);
+        LogoutButton.gameObject.SetActive(true);
+
     }
 
     public void DisplayProfile()
     {
         
+    }
+
+    public void Logout()
+    {
+        PlayerPrefs.DeleteAll();
+        SceneManager.LoadScene("SampleScene");
     }
 
     public void Wait(float seconds, Action action)

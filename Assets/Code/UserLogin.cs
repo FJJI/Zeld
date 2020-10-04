@@ -162,11 +162,7 @@ public class UserLogin : MonoBehaviour
                     if (dictUser["username"].ToString() == username && dictUser["password"].ToString() == password)
                     {
                         Debug.Log("" + user.Key + "-" + dictUser["username"] + " - " + dictUser["email"] + " - " + dictUser["password"]);
-                        logged_key = user.Key;
-                        PlayerPrefs.SetString("Username", dictUser["username"].ToString());
-                        PlayerPrefs.SetString("Email", dictUser["email"].ToString());
-                        PlayerPrefs.SetInt("Wins", int.Parse(dictUser["wins"].ToString()));
-                        PlayerPrefs.SetInt("Loses", int.Parse(dictUser["loses"].ToString()));
+                        logged_key = user.Key.ToString();
                         break;
                         
                     }
@@ -178,14 +174,16 @@ public class UserLogin : MonoBehaviour
         Debug.Log(logged_key);
         if (logged_key != null)
         {
-            if (just_created)
+            if (just_created == true)
             {
-                string owner = logged_key;
-                string json = JsonUtility.ToJson(owner);
+                Lists lists = new Lists(logged_key);
+                string json = JsonUtility.ToJson(lists);
                 await reference.Child("friendLists").Child(logged_key).SetRawJsonValueAsync(json);
                 await reference.Child("requestLists").Child(logged_key).SetRawJsonValueAsync(json);
+                Debug.Log("Lists Created");
             }
             PlayerPrefs.SetString("UID", logged_key);
+            PlayerPrefs.SetString("UserName", UserNameInput.text);
             SceneManager.LoadScene("Main Menu");
         }
 
