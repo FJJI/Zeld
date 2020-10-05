@@ -19,7 +19,7 @@ public class MainMenu : MonoBehaviour
     public Text ErrorMessage;
     public List<Request> requestsL;
     public List<Friend> friendsL;
-    bool found;
+    bool found, friend_showed, request_showed;
     long rows;
     public string logged_key, target;
     private DatabaseReference reference;
@@ -29,6 +29,8 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         found = false;
+        friend_showed = false;
+        request_showed = false;
         target = "";
         rows = 0;
         requestsL = new List<Request>();
@@ -49,11 +51,12 @@ public class MainMenu : MonoBehaviour
 
     public async void DisplayFriends(string key)
     {
-        while (FriendContent.transform.childCount > 0)
+        int initial_rows = 0;
+        if (friend_showed == true)
         {
-            Destroy(FriendContent.transform.GetChild(0).gameObject);
+            initial_rows = friendsL.Count;
         }
-        friendsL = new List<Friend>();
+        friend_showed = true;
         FriendListButton.gameObject.SetActive(false);
         ProfileButton.gameObject.SetActive(false);
         CreateRoomButton.gameObject.SetActive(false);
@@ -81,16 +84,27 @@ public class MainMenu : MonoBehaviour
                 {
                     foreach (DataSnapshot friend in snapshot.Children)
                     {
+                        bool added = false;
                         IDictionary dictFriend = (IDictionary)friend.Value;
                         Friend f_row = new Friend(dictFriend["friend_name"].ToString(), dictFriend["friend_id"].ToString(), 0, 0);
-                        friendsL.Add(f_row);
+                        foreach (Friend f in friendsL)
+                        {
+                            if (f.friend_id == f_row.friend_id)
+                            {
+                                added = true;
+                            }
+                        }
+                        if (added == false)
+                        {
+                            friendsL.Add(f_row);
+                        }                       
                     }
                 }
 
             }
         });
         // Aqui empezamos el ciclo para agregar cada row al FriendsView
-        for (int i = 0; i < friendsL.Count; i++)
+        for (int i = initial_rows; i < friendsL.Count; i++)
         {
             string f_id = friendsL[i].friend_id;
             GameObject SpawnedItem = Instantiate(FriendRow);
@@ -104,11 +118,12 @@ public class MainMenu : MonoBehaviour
 
     public async void DisplayRequests(string key)
     {
-        while (RequestContent.transform.childCount > 0)
+        int initial_rows = 0;
+        if (request_showed == true)
         {
-            Destroy(RequestContent.transform.GetChild(0).gameObject);
+            initial_rows = requestsL.Count;          
         }
-        requestsL = new List<Request>();
+        request_showed = true;
         FriendsView.gameObject.SetActive(false);
         RequestsView.gameObject.SetActive(true);
         // obtenemos todas las solicitudes recibidas en nuestra lista de requests
@@ -139,7 +154,7 @@ public class MainMenu : MonoBehaviour
         });
         // Aqui empezamos el ciclo para agregar cada row al requestsView
         
-        for (int i = 0; i < requestsL.Count; i++)
+        for (int i = initial_rows; i < requestsL.Count; i++)
         {
             string f_name = requestsL[i].from_name;
             string f_id = requestsL[i].from_id;
