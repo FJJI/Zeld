@@ -8,6 +8,7 @@ using Firebase.Auth;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System;
+using System.Text.RegularExpressions;
 
 public class UserLogin : MonoBehaviour
 {
@@ -87,6 +88,21 @@ public class UserLogin : MonoBehaviour
             return;
         }
 
+        if (password.Length != 12)
+        {
+            ErrorText.text = "Password must have 12 characters";
+            return;
+        }
+
+        Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+        Match match = regex.Match(email);
+
+        if(!match.Success)
+        {
+            ErrorText.text = "Invalid Email Format";
+            return;
+        }
+
         ErrorText.text = "";
         
         await dbInstance.GetReference("users").GetValueAsync().ContinueWith(task => {
@@ -126,7 +142,7 @@ public class UserLogin : MonoBehaviour
             ErrorText.text = "Email Already in the System";
         }
 
-        User new_user = new User(username, email, password, 0, 0);
+        User new_user = new User(username, email, password, 0, 0, "none", "none", "none");
         string json = JsonUtility.ToJson(new_user);
         await reference.Child("users").Push().SetRawJsonValueAsync(json);
         just_created = true;

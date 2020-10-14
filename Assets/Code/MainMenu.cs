@@ -252,7 +252,7 @@ public class MainMenu : MonoBehaviour
 
     public void DisplayProfile()
     {
-        
+        SceneManager.LoadScene("ProfileScene");
     }
 
     public void Logout()
