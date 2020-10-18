@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/ProfileScene.unity
     guid: 968ebe17cf9e787469f74ca866b05da0
   - enabled: 1
+    path: Assets/Scenes/CreateRoomScene.unity
+    guid: 59d6846b2ad61b14cbb46a4eb356607c
+  - enabled: 1
     path: Assets/Scenes/RoomScene.unity
     guid: 9119d2e1d04c0254e935cc0e40c52427
   m_configObjects: {}

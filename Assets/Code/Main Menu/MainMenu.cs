@@ -19,8 +19,9 @@ public class MainMenu : MonoBehaviour
     public Text ErrorMessage;
     public List<Request> requestsL;
     public List<Friend> friendsL;
-    bool found, friend_showed, request_showed;
+    bool found, friend_showed, request_showed, room_exist, room_full;
     long rows;
+    int room_size;
     public string logged_key, target;
     private DatabaseReference reference;
     private FirebaseDatabase dbInstance;
@@ -29,10 +30,14 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         found = false;
+        room_exist = false;
         friend_showed = false;
         request_showed = false;
         target = "";
         rows = 0;
+        room_exist = false;
+        room_full = false;
+        room_size = 0;
         requestsL = new List<Request>();
         friendsL = new List<Friend>();
         logged_key = PlayerPrefs.GetString("UID");
@@ -46,6 +51,7 @@ public class MainMenu : MonoBehaviour
         BackButton.onClick.AddListener(() => Back());
         AddFriend.onClick.AddListener(() => AddFriends(logged_key, FriendToAdd.text));
         LogoutButton.onClick.AddListener(() => Logout());
+        CreateRoomButton.onClick.AddListener(() => CreateRoom());
 
     }
 
@@ -259,6 +265,66 @@ public class MainMenu : MonoBehaviour
     {
         PlayerPrefs.DeleteAll();
         SceneManager.LoadScene("SampleScene");
+    }
+
+    public void CreateRoom()
+    {
+        SceneManager.LoadScene("CreateRoomScene");
+    }
+
+    public async void JoinRoom(string roomId)
+    {
+        await dbInstance.GetReference("rooms").Child(roomId).GetValueAsync().ContinueWith(task => {
+            if (task.IsFaulted) { }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                if (snapshot == null)
+                {
+                    room_exist = false;
+                }
+                else
+                {
+                    room_exist = true;
+                    IDictionary roomDict = (IDictionary)snapshot.Value;
+                    room_size = int.Parse(roomDict["roomSize"].ToString());
+                }
+
+            }
+        });
+        if (room_exist == true)
+        {
+            await dbInstance.GetReference("rooms").Child(roomId).Child("players").GetValueAsync().ContinueWith(task => {
+                if (task.IsFaulted) { }
+                else if (task.IsCompleted)
+                {
+                    DataSnapshot snapshot = task.Result;
+                    int players = int.Parse(snapshot.ChildrenCount.ToString());
+                    if (players < room_size)
+                    {
+                        room_full = false;
+                    }
+                    else
+                    {
+                        room_full = true;
+                    }                   
+                    
+                }
+            });
+            if (room_full == false)
+            {
+                PlayerPrefs.SetString("Room", roomId);
+                PlayerClass player = new PlayerClass(PlayerPrefs.GetString("UserName"), false);
+                string json = JsonUtility.ToJson(player);
+                await reference.Child("rooms").Child(roomId.ToString()).Child("players").Child(PlayerPrefs.GetString("UID")).SetRawJsonValueAsync(json);
+                SceneManager.LoadScene("RoomScene");
+
+            }
+            else
+            {
+                //indicar sala llena
+            }
+        }
     }
 
     public void Wait(float seconds, Action action)
