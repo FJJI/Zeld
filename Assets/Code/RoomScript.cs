@@ -18,8 +18,11 @@ public class RoomScript : MonoBehaviour
     private DatabaseReference reference;
     private FirebaseDatabase dbInstance;
     public string logged_key;
-    public string roomId;
+    public string roomId, errorMessage;
     public List<PlayerClass> room_players;
+    public List<int> id_players;
+    public bool ready;
+    public long capacity;
 
     void Start()
     {
@@ -29,11 +32,16 @@ public class RoomScript : MonoBehaviour
         reference = FirebaseDatabase.DefaultInstance.RootReference; //escritura
         dbInstance = FirebaseDatabase.DefaultInstance; //lectura
         room_players = new List<PlayerClass>();
+        capacity = 0;
+        ready = false;
+        errorMessage = "";
         SetupDisplay();
         dbInstance.GetReference("rooms").Child(roomId).Child("messages").ChildAdded += HandleMessageAdded;
         dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildAdded += HandlePLayerAdded;
+        dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildRemoved += HandlePlayerRemoved;
         sendButton.onClick.AddListener(() => SenderChat(chatInput.text));
         leaveButton.onClick.AddListener(() => LeavePress());
+        readyButton.onClick.AddListener(() =>ReadyPress());
     }
 
     void HandleMessageAdded(object sender, ChildChangedEventArgs args)
@@ -61,15 +69,26 @@ public class RoomScript : MonoBehaviour
         }
         DataSnapshot data = args.Snapshot;
         IDictionary dictPlayer = (IDictionary)data.Value;
-        PlayerClass p_row = new PlayerClass(dictPlayer["username"].ToString(), bool.Parse(dictPlayer["ready"].ToString()));
+        PlayerClass p_row = new PlayerClass(dictPlayer["username"].ToString(), dictPlayer["ready"].ToString());
         GameObject SpawnedItem = Instantiate(playersRow);
         SpawnedItem.transform.SetParent(playersContent, false);
         SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = p_row.username;
         SpawnedItem.transform.GetChild(1).GetComponent<Text>().text = p_row.ready.ToString();
     }
 
+    void HandlePlayerRemoved(object sender, ChildChangedEventArgs args)
+    {
+         
+    }
+
     public async void SetupDisplay()
     {
+        await dbInstance.GetReference("rooms").Child(roomId).GetValueAsync().ContinueWith(task =>
+        {
+            DataSnapshot snapshot = task.Result;
+            IDictionary room = (IDictionary)snapshot.Value;
+            capacity = long.Parse(room["roomSize"].ToString());
+        });
         await dbInstance.GetReference("rooms").Child(roomId).Child("players").GetValueAsync().ContinueWith(task =>
         {
             if (task.IsFaulted) { }
@@ -79,7 +98,7 @@ public class RoomScript : MonoBehaviour
                 foreach (DataSnapshot p in snapshot.Children)
                 {
                     IDictionary dictPlayer = (IDictionary)p.Value;
-                    PlayerClass p_row = new PlayerClass(dictPlayer["username"].ToString(), bool.Parse(dictPlayer["ready"].ToString()));
+                    PlayerClass p_row = new PlayerClass(dictPlayer["username"].ToString(), dictPlayer["ready"].ToString());
                     room_players.Add(p_row);
                 }
 
@@ -106,9 +125,43 @@ public class RoomScript : MonoBehaviour
         SceneManager.LoadScene("Main Menu");
     }
 
-    public void StartGame()
+    public async void StartGame()
     {
-
+        await dbInstance.GetReference("rooms").Child(roomId).Child("players").GetValueAsync().ContinueWith(task =>
+        {
+            if (task.IsFaulted) { }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                if (snapshot.ChildrenCount != capacity)
+                {
+                    errorMessage = "Not enough players";
+                    return;
+                   
+                }
+                foreach (DataSnapshot p in snapshot.Children)
+                {
+                    IDictionary dictPlayer = (IDictionary)p.Value;
+                    if (dictPlayer["ready"].ToString() == "false")
+                    {
+                        ready = false;
+                        errorMessage = "All players must be ready";
+                        break;
+                    }
+                    else
+                    {
+                        ready = true;
+                    }
+                    
+                }
+            }
+        });
+        if (ready == false)
+        {
+            //display message; 
+            return;   
+        }
+        //start game
     }
 
     public async void SenderChat(string content)

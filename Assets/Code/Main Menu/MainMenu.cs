@@ -314,7 +314,7 @@ public class MainMenu : MonoBehaviour
             if (room_full == false)
             {
                 PlayerPrefs.SetString("Room", roomId);
-                PlayerClass player = new PlayerClass(PlayerPrefs.GetString("UserName"), false);
+                PlayerClass player = new PlayerClass(PlayerPrefs.GetString("UserName"), "false");
                 string json = JsonUtility.ToJson(player);
                 await reference.Child("rooms").Child(roomId.ToString()).Child("players").Child(PlayerPrefs.GetString("UID")).SetRawJsonValueAsync(json);
                 SceneManager.LoadScene("RoomScene");
