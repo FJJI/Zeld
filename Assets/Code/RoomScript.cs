@@ -10,15 +10,17 @@ using System;
 public class RoomScript : MonoBehaviour
 {
 
-    public Button readyButton, startButton, leaveButton, sendButton;
-    public Text idLabel, playersLabel;
+    public Button readyButton, startButton, leaveButton, sendButton, backProfileButton;
+    public Text idLabel, playersLabel, friendName, friendLoses, friendWins, prefFriend, friendPrefU, nemesisFriend;
     public InputField chatInput;
     public GameObject chatView, playersView, chatRow, playersRow;
+    public Canvas roomCanvas, profileCanvas;
     public Transform chatContent, playersContent;
     private DatabaseReference reference;
     private FirebaseDatabase dbInstance;
     public string logged_key;
     public string roomId, errorMessage;
+    public string fname, floses, fwins, fnemesis, fprefg, ffavu;
     public List<PlayerClass> room_players;
     public List<int> id_players;
     public bool ready;
@@ -35,13 +37,20 @@ public class RoomScript : MonoBehaviour
         capacity = 0;
         ready = false;
         errorMessage = "";
+        fname = "";
+        floses = "";
+        fwins = "";
+        fnemesis = "";
+        fprefg = "";
+        ffavu = "";
         SetupDisplay();
         dbInstance.GetReference("rooms").Child(roomId).Child("messages").ChildAdded += HandleMessageAdded;
         dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildAdded += HandlePLayerAdded;
         dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildRemoved += HandlePlayerRemoved;
         sendButton.onClick.AddListener(() => SenderChat(chatInput.text));
         leaveButton.onClick.AddListener(() => LeavePress());
-        readyButton.onClick.AddListener(() =>ReadyPress());
+        readyButton.onClick.AddListener(() => ReadyPress());
+        backProfileButton.onClick.AddListener(() => HideProfileCanvas());
     }
 
     void HandleMessageAdded(object sender, ChildChangedEventArgs args)
@@ -108,9 +117,11 @@ public class RoomScript : MonoBehaviour
         for (int i = 0; i < room_players.Count; i++)
         {
             GameObject SpawnedItem = Instantiate(playersRow);
+            string temp_name = room_players[i].username;
             SpawnedItem.transform.SetParent(playersContent, false);
-            SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = room_players[i].username;
+            SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = temp_name;
             SpawnedItem.transform.GetChild(1).GetComponent<Text>().text = room_players[i].ready.ToString();
+            SpawnedItem.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => DisplayProfile(temp_name));
         }
     }
 
@@ -172,5 +183,43 @@ public class RoomScript : MonoBehaviour
         await reference.Child("rooms").Child(roomId).Child("messages").Push().SetRawJsonValueAsync(json);
     }
 
+    public async void DisplayProfile(string name)
+    {
+        await dbInstance.GetReference("users").GetValueAsync().ContinueWith(task =>
+        {
+            if (task.IsFaulted) { }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                foreach (DataSnapshot user in snapshot.Children)
+                {
+                    IDictionary Duser = (IDictionary)user.Value;
+                    if (Duser["username"].ToString() == name)
+                    {
+                        fname = Duser["username"].ToString();
+                        floses = "Loses: " + Duser["loses"].ToString();
+                        fwins = "Wins: " + Duser["wins"].ToString();
+                        fnemesis = "Nemesis: " + Duser["nemesis"].ToString();
+                        fprefg = "Prefered Game: " + Duser["pref_game"].ToString();
+                        ffavu = "Favorite Unit: " + Duser["fav_unit"].ToString();
+                    }
+                }
+            }
+        });
+        friendName.text = fname;
+        friendWins.text = fwins;
+        friendLoses.text = floses;
+        prefFriend.text = fprefg;
+        friendPrefU.text = ffavu;
+        nemesisFriend.text = fnemesis;
+        profileCanvas.gameObject.SetActive(true);
+        roomCanvas.gameObject.SetActive(false);
+    }
+
+    public void HideProfileCanvas()
+    {
+        roomCanvas.gameObject.SetActive(true);
+        profileCanvas.gameObject.SetActive(false);
+    }
     
 }

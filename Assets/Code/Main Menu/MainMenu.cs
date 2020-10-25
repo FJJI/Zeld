@@ -19,10 +19,10 @@ public class MainMenu : MonoBehaviour
     public Text ErrorMessage;
     public List<Request> requestsL;
     public List<Friend> friendsL;
-    bool found, friend_showed, request_showed, room_exist, room_full;
+    bool found, friend_showed, request_showed, room_exist, room_full, owner_friend;
     long rows;
     int room_size;
-    public string logged_key, target;
+    public string logged_key, target, room_owner;
     private DatabaseReference reference;
     private FirebaseDatabase dbInstance;
 
@@ -37,6 +37,8 @@ public class MainMenu : MonoBehaviour
         rows = 0;
         room_exist = false;
         room_full = false;
+        room_owner = "";
+        owner_friend = false;
         room_size = 0;
         requestsL = new List<Request>();
         friendsL = new List<Friend>();
@@ -288,12 +290,35 @@ public class MainMenu : MonoBehaviour
                     room_exist = true;
                     IDictionary roomDict = (IDictionary)snapshot.Value;
                     room_size = int.Parse(roomDict["roomSize"].ToString());
+                    room_owner = roomDict["owner"].ToString();
                 }
 
             }
         });
+
         if (room_exist == true)
         {
+            await dbInstance.GetReference("friendLists").Child(logged_key).Child("friends").Child(room_owner).GetValueAsync().ContinueWith(task =>
+            {
+                if (task.IsFaulted) { }
+                else if (task.IsCompleted)
+                {
+                    DataSnapshot snapshot = task.Result;
+                    if (snapshot == null)
+                    {
+                        owner_friend = false;
+                    }
+                    else
+                    {
+                        owner_friend = true;
+                    }
+                }
+            });
+            if (owner_friend == false)
+            {
+                ErrorMessage.text = "No eres amigo del dueño de la sesion";
+                return;
+            }
             await dbInstance.GetReference("rooms").Child(roomId).Child("players").GetValueAsync().ContinueWith(task => {
                 if (task.IsFaulted) { }
                 else if (task.IsCompleted)

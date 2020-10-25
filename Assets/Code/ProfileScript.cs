@@ -69,7 +69,7 @@ public class ProfileScript : MonoBehaviour
         losesLabel.text = "Loses: " + loses;
         prefGLabel.text = "Prefered Game: " + fav_game;
         FavULabel.text = "Favorite initial Unit: " + fav_unit;
-        NemesisLabel.text = "Nemesis: " + nemesis;
+        SetNemesis();
     }
 
     public void EditProfile()
@@ -131,6 +131,33 @@ public class ProfileScript : MonoBehaviour
         oldPassInput.gameObject.SetActive(false);
         saveButton.gameObject.SetActive(false);
         cancelButton.gameObject.SetActive(false);
+    }
+
+    public async void SetNemesis()
+    {
+        int loses = 0;
+        string nem = "";
+        await dbInstance.GetReference("friendLists").Child(logged_key).Child("friends").GetValueAsync().ContinueWith(task =>
+        {          
+            if (task.IsFaulted) { }
+            else if (task.IsCompleted)
+            {
+                DataSnapshot snapshot = task.Result;
+                foreach (DataSnapshot friend in snapshot.Children)
+                {
+                    IDictionary fDict = (IDictionary)friend.Value;
+                    int f_loses = int.Parse(fDict["loses"].ToString());
+                    if (f_loses > loses)
+                    {
+                        loses = f_loses;
+                        nem = fDict["friend_name"].ToString();
+                    }
+                }
+            }
+
+        });
+        NemesisLabel.text = "Nemesis: " + nem;
+        await reference.Child("users").Child(logged_key).Child("nemesis").SetValueAsync(nem);
     }
 
     public void BackToMenu()
