@@ -5,6 +5,8 @@ using UnityEngine;
 public class DataPaso : MonoBehaviour
 {
     public static DataPaso dataPaso;
+    public static int Playing; 
+    // Este es el jugador que va a estar jugando (segun id en la partida se de si es el j1 o j2)
 
     void Awake()
     {

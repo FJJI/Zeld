@@ -2,9 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Seleccion_y_Union : MonoBehaviour
 {
+    GameObject textObject;
+    public int points = 50;
+    public int counter = 0; //fines demostrativos
     public int total_nodes = 2;
     public int used_nodes = 0;
     public static GameObject first;
@@ -14,6 +18,10 @@ public class Seleccion_y_Union : MonoBehaviour
     public List<GameObject> objectives;
     public List<GameObject> unions;
     public GameObject arrow;
+
+    public SpriteRenderer sprite;
+    public int owner; // 0 if neutral, else to playerN
+
     void CheckType()
     {
         if (type == 3) // aumentamos la cantidad de nodos usables
@@ -21,7 +29,7 @@ public class Seleccion_y_Union : MonoBehaviour
             total_nodes += 1;
         }
         // Para crear los objetivos de cada uno
-        for(int i = 0; i<total_nodes; i++)
+        for (int i = 0; i < total_nodes; i++)
         {
             objectives.Add(null);
             unions.Add(null);
@@ -38,6 +46,14 @@ public class Seleccion_y_Union : MonoBehaviour
         else if (first == this.transform.gameObject)
         {
             Debug.Log("Ya no hay first" + this.gameObject);
+            Debug.Log("Todos los nodos eliminados" + this.gameObject);
+            for (int i = 0; i < total_nodes; i++)
+            {
+                used_nodes -= 1;
+                objectives[i] = null;
+                try { Destroy(unions[i].gameObject); } catch { }
+                unions[i] = null;
+            }
             first = null;
         }
         else if (first != this.transform.gameObject)
@@ -54,9 +70,10 @@ public class Seleccion_y_Union : MonoBehaviour
                         //ya existe, elimino la flecha y libero el cupo
                         first_code.used_nodes -= 1;
                         first_code.objectives[i] = null;
-                        Destroy(first_code.unions[i]);
+                        Destroy(first_code.unions[i].gameObject);
                         first_code.unions[i] = null;
-                        Debug.Log("nodo sacado" + this.gameObject);
+                        //Debug.Log("nodo sacado" + this.gameObject);
+                        first = null;
                         return;
                     }
                 }
@@ -69,15 +86,15 @@ public class Seleccion_y_Union : MonoBehaviour
                     {
                         first_code.objectives[i] = this.gameObject;
                         index_to_use = i;
-                        Debug.Log("AAA");
                         first_code.used_nodes += 1;
                         break;
                     }
                 }
                 //finalmente, casteo la linea
                 Debug.Log(first.transform.position);
-                float distX = Math.Abs(first.transform.position.x-transform.position.x);
-                float distY = Math.Abs(first.transform.position.y-transform.position.y);
+                float distTotal = Vector2.Distance(first.transform.position, transform.position);
+                float distX = Math.Abs(first.transform.position.x - transform.position.x);
+                float distY = Math.Abs(first.transform.position.y - transform.position.y);
                 float middleX;
                 float middleY;
                 //calculos de puntos medios
@@ -87,23 +104,23 @@ public class Seleccion_y_Union : MonoBehaviour
                 #endregion
 
                 int angle;
-                angle =(int)(Math.Atan(distY/distX)*180/Math.PI);
+                angle = (int)(Math.Atan(distY / distX) * 180 / Math.PI);
                 //fixing angle depending on direction
-                if(first.transform.position.x<transform.position.x && first.transform.position.y>=transform.position.y)
+                if (first.transform.position.x < transform.position.x && first.transform.position.y >= transform.position.y)
                 {
-                    angle*=-1;
-                    
+                    angle *= -1;
+
                 }
-                else if(first.transform.position.x>=transform.position.x && first.transform.position.y>=transform.position.y)
+                else if (first.transform.position.x >= transform.position.x && first.transform.position.y >= transform.position.y)
                 {
-                    angle+=180;
+                    angle += 180;
                 }
-                else if(first.transform.position.x>=transform.position.x && first.transform.position.y<transform.position.y)
+                else if (first.transform.position.x >= transform.position.x && first.transform.position.y < transform.position.y)
                 {
-                    angle+=(90-angle)*2;
+                    angle += (90 - angle) * 2;
                 }
                 Debug.Log("angulo: " + angle);
-                GameObject g = Instantiate(arrow, new Vector3(middleX,middleY, transform.position.z), Quaternion.identity);
+                GameObject g = Instantiate(arrow, new Vector3(middleX, middleY, transform.position.z), Quaternion.identity);
                 /*
                 //find the vector pointing from our position to the target
                 Vector3 _direction = (Target.position - transform.position).normalized;
@@ -114,14 +131,34 @@ public class Seleccion_y_Union : MonoBehaviour
                 //rotate us over time according to speed until we are in the required rotation
                 transform.rotation = Quaternion.Slerp(transform.rotation, _lookRotation, Time.deltaTime * RotationSpeed);
                 */
-                g.transform.Rotate(0, 0, angle-90);
-                Debug.Log("Union entre"+ first+ "and"+ this.gameObject);
+                g.transform.Rotate(0, 0, angle - 90);
+                g.transform.localScale = new Vector3(0.3f, 0.15f * distTotal - 0.3f, 1); //the minus parameter avoid the arrow to enter into the circle
+                first_code.unions[index_to_use] = g;
+                Debug.Log("Union entre" + first + "and" + this.gameObject);
                 first = null;
+
 
             }
             else
             {
-                Debug.Log("This node can´t have more nodes");
+                for (int i = 0; i < first_code.total_nodes; i++)
+                {
+                    if (first_code.objectives[i] == this.gameObject)
+                    {
+                        //ya existe, elimino la flecha y libero el cupo
+                        first_code.used_nodes -= 1;
+                        first_code.objectives[i] = null;
+                        Destroy(first_code.unions[i].gameObject);
+                        first_code.unions[i] = null;
+                        Debug.Log("nodo sacado" + this.gameObject);
+                        first = null;
+                        return;
+                    }
+                    else
+                    {
+                        Debug.Log("This node can´t have more nodes");
+                    }
+                }
             }
         }
     }
@@ -132,13 +169,49 @@ public class Seleccion_y_Union : MonoBehaviour
         return vect;
     }
 
+    void ChangeColor()
+    {
+        if (owner == 0)
+        {
+            sprite.color = new Color(1f, 1f, 1f, 1);
+        }
+        else if (owner == 1)
+        {
+            sprite.color = new Color(0.2002492f, 9433962f, 0.5556294f, 1);
+        }
+        else if (owner == 2)
+        {
+            sprite.color = new Color(0.8867924f, 0.0f, 0.788344f, 1);
+        }
+        if (first == this.gameObject)
+        {
+            first.GetComponent<Seleccion_y_Union>().sprite.color = new Color(0.9677409f, 1f, 0.495283f, 1);
+        }
+    }
+
+    private void ChangeHP()
+    {
+        //demostrative only of modifying the points
+        textObject.GetComponent<TextMeshProUGUI>().text = points.ToString();
+        counter++;
+        if (objectives[0] != null && counter > 400)
+        {
+            objectives[0].GetComponent<Seleccion_y_Union>().points--;
+            counter = 0;
+        }
+    }
+
     void Start()
     {
         CheckType();
+        textObject = gameObject.transform.GetChild(0).GetChild(0).gameObject;
+        textObject.GetComponent<TextMeshProUGUI>().text = points.ToString();
     }
 
     // Update is called once per frame
     void Update()
     {
+        ChangeColor();
+        ChangeHP();
     }
 }
