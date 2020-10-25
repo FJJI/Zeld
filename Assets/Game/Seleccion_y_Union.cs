@@ -97,6 +97,9 @@ public class Seleccion_y_Union : MonoBehaviour
                 float distY = Math.Abs(first.transform.position.y - transform.position.y);
                 float middleX;
                 float middleY;
+                Vector2 colliderClosest1 = collider.ClosestPoint(first.transform.position);
+                Vector2 colliderClosest2 = first.GetComponent<CircleCollider2D>().ClosestPoint(transform.position);
+                float colliderDist = Vector2.Distance(colliderClosest1, colliderClosest2);
                 //calculos de puntos medios
                 #region
                 middleX = (first.transform.position.x + transform.position.x) / 2f;
@@ -163,14 +166,9 @@ public class Seleccion_y_Union : MonoBehaviour
         }
     }
 
-    Vector2 point(GameObject game)
-    {
-        Vector2 vect = collider.ClosestPoint(game.transform.position);
-        return vect;
-    }
-
     void ChangeColor()
     {
+        #region Colores y halo
         if (owner == 0)
         {
             sprite.color = new Color(1f, 1f, 1f, 1);
@@ -199,6 +197,7 @@ public class Seleccion_y_Union : MonoBehaviour
         {
             halo.GetType().GetProperty("enabled").SetValue(halo, false, null);
         }
+        #endregion
     }
 
     private void ChangeHP()
