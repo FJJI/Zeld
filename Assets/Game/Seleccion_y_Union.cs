@@ -18,7 +18,7 @@ public class Seleccion_y_Union : MonoBehaviour
     public List<GameObject> objectives;
     public List<GameObject> unions;
     public GameObject arrow;
-
+    public Component halo;
     public SpriteRenderer sprite;
     public int owner; // 0 if neutral, else to playerN
 
@@ -183,9 +183,21 @@ public class Seleccion_y_Union : MonoBehaviour
         {
             sprite.color = new Color(0.8867924f, 0.0f, 0.788344f, 1);
         }
+        else if (owner == 3)
+        {
+            sprite.color = new Color(0.9677409f, 1f, 0.495283f, 1);
+        }
+        else if (owner == 4)
+        {
+            sprite.color = new Color(0f, 0f, 0f, 1);
+        }
         if (first == this.gameObject)
         {
-            first.GetComponent<Seleccion_y_Union>().sprite.color = new Color(0.9677409f, 1f, 0.495283f, 1);
+            halo.GetType().GetProperty("enabled").SetValue(halo, true, null);
+        }
+        else
+        {
+            halo.GetType().GetProperty("enabled").SetValue(halo, false, null);
         }
     }
 

@@ -375,6 +375,7 @@ MonoBehaviour:
   objectives: []
   unions: []
   arrow: {fileID: 3853505329974284110, guid: 38221f1bb1897c0408cd0b3dafa9421e, type: 3}
+  halo: {fileID: 754039136905801142}
   sprite: {fileID: 6779469752411818594}
   owner: 0
 --- !u!122 &754039136905801142
