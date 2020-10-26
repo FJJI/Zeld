@@ -136,7 +136,7 @@ public class end_Turn : MonoBehaviour
         laData.GetComponent<DataPaso>().player_turn = controller.player_turn;
         laData.GetComponent<DataPaso>().players_number = controller.players_number;
         laData.GetComponent<DataPaso>().defeated = controller.defeated;
-        SceneManager.LoadScene("baserino");
+        SceneManager.LoadScene("ZeldGame");
     }
 
     void Start()

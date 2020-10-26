@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using TMPro;
+
 
 public class Info : MonoBehaviour
 {
@@ -129,12 +131,9 @@ public class Info : MonoBehaviour
             nodos.Add(nodoActivo);
             Debug.Log(nodo.points + " Nodo Points");
             Debug.Log(data.points + " Data Points");
+            GameObject textObject = nodoActivo.gameObject.transform.GetChild(0).GetChild(0).gameObject;
+            textObject.GetComponent<TextMeshProUGUI>().text = data.points.ToString();
 
-
-            for (int j = 0; j < data.total_nodes; j++)
-            {
-                //hi
-            }
         }
 
         for (int i = 0; i < json.Count; i++)
@@ -142,22 +141,29 @@ public class Info : MonoBehaviour
             Seleccion_y_Union data = nodos[i].GetComponent<Seleccion_y_Union>();
             for (int j = 0; j < data.total_nodes; j++)
             {
-                data.objectives.Add(null);
-                data.unions.Add(null);
+
                 try {
                     if (nodosIngresados[i].objectives[j] < j)
                     {
+                        if (nodos[nodosIngresados[i].objectives[j]])
+                        {
+                            data.objectives.Add(null);
+                            data.unions.Add(null);
+                        }
                         continue;
                     }
                     else
                     {
                         Debug.Log(data.objectives.Count + " i " + i + "aaa " + nodosIngresados[i].objectives[j]);
                         data.objectives[i] = nodos[nodosIngresados[i].objectives[j]];
-                        Seleccion_y_Union.first = nodos[i];
-                        data.objectives[i].GetComponent<Seleccion_y_Union>().ArrowCreation(j, data, Seleccion_y_Union.first);
-                        Seleccion_y_Union.first = null;
+                        //Seleccion_y_Union.first = nodos[j];
+                        //data.objectives[i].GetComponent<Seleccion_y_Union>().ArrowCreation(j, data, Seleccion_y_Union.first);
+                        //Seleccion_y_Union.first = null;
                     }
-                } catch { continue; }
+                } catch {
+                    data.objectives.Add(null);
+                    data.unions.Add(null); 
+                    continue; }
             }
         }
     }
