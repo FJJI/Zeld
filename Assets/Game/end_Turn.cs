@@ -114,7 +114,7 @@ public class end_Turn : MonoBehaviour
                     GameObject nodo_Objetivo = controller.nodos[k];
                     if (nodo_base.GetComponent<Seleccion_y_Union>().objectives[j] == nodo_Objetivo)
                     {
-                        nodos[i].addObj(j);
+                        nodos[i].addObj(k);
                         break;
                     }
                 }
@@ -130,6 +130,7 @@ public class end_Turn : MonoBehaviour
         {
             Debug.Log(many_jsons[i]);
         }
+        laData = GameObject.Find("DataAGuardar");
         laData.GetComponent<DataPaso>().json = many_jsons.Select(x => x).ToList();
         //SceneManager.LoadScene("baserino");
     }
