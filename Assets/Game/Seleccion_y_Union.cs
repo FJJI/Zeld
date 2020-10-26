@@ -33,11 +33,8 @@ public class Seleccion_y_Union : MonoBehaviour
         // Para crear los objetivos de cada uno
         for (int i = 0; i < total_nodes; i++)
         {
-            if (i > used_nodes)
-            {
-                objectives.Add(null);
+            objectives.Add(null);
             unions.Add(null);
-            }
         }
     }
 
