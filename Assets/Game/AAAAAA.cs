@@ -24,16 +24,14 @@ public class AAAAAA : MonoBehaviour
     {
         
     }
-    /*
+
     // Data para ser entregada 
     List<bool> defeated = new List<bool> { false, false }; // si saber quien pierde
     public int player_turn; // De Quien es el turno
     public int players_number; // cuantos players partieron la partida 
     public int turn; // Cuantos Turnos LLevamos
-    List<float> x
-    List<float> y
-    List<float> z
-
-    */
+    List<float> posx = new List<float> { 1f,1f,1f};
+    List<float> posy = new List<float> { 1f, 1f, 1f };
+    List<float> posz = new List<float> { 1f, 1f, 1f };
 
 }
