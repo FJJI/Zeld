@@ -11,5 +11,11 @@ public class AAAAAA : MonoBehaviour
         SceneManager.LoadScene("ZeldGame");
     }
 
+    private void Start()
+    {
+        GameObject laData = GameObject.Find("DataAGuardar");
+        Debug.Log(laData.GetComponent<DataPaso>().json);
+        Debug.Log(laData.GetComponent<DataPaso>().json[0]);
+    }
 
 }

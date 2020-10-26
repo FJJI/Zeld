@@ -132,7 +132,7 @@ public class end_Turn : MonoBehaviour
         }
         laData = GameObject.Find("DataAGuardar");
         laData.GetComponent<DataPaso>().json = many_jsons.Select(x => x).ToList();
-        //SceneManager.LoadScene("baserino");
+        SceneManager.LoadScene("baserino");
     }
 
     void Start()

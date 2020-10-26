@@ -8,7 +8,13 @@ public class DataPaso : MonoBehaviour
     public static int Playing;
     // Este es el jugador que va a estar jugando (segun id en la partida se de si es el j1 o j2)
     public List<string> json;
-    
+
+    //datos para la partida
+    public int players_number; // cuantos players hay en la partida 
+    public int turn; // Cuantos Turnos LLevamos
+    public int player_turn; // De Quien es el turno 
+    public int IdSala;
+
     void Awake()
     {
         if (dataPaso == null)

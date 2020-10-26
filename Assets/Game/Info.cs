@@ -12,16 +12,17 @@ public class Info : MonoBehaviour
     public GameObject Ataque;
     public GameObject Defensa;
     public List<bool> defeated;
-    public List<GameObject> tipoNodos;
+    public List<GameObject> tipoNodos = new List<GameObject>();
     public GameObject laData;
 
     //datos para la partida
     public int players_number; // cuantos players hay en la partida 
     public int turn; // Cuantos Turnos LLevamos
     public int player_turn; // De Quien es el turno 
+    public int IdSala;
 
     public List<string> json;
-    public List<Nodo> nodosIngresados;
+    public List<Nodo> nodosIngresados = new List<Nodo>();
 
     void setup()
     {
@@ -75,6 +76,7 @@ public class Info : MonoBehaviour
         for (int i = 0; i < json.Count; i++)
         {
             Nodo nodo = JsonUtility.FromJson<Nodo>(json[i]);
+            nodosIngresados.Add(nodo);
             GameObject nodoActivo = Instantiate(tipoNodos[nodo.type], new Vector3(nodo.posx, nodo.posy, nodo.posz), Quaternion.identity);
             Seleccion_y_Union data = nodoActivo.GetComponent<Seleccion_y_Union>();
             data.points = nodo.points;
@@ -84,8 +86,10 @@ public class Info : MonoBehaviour
             data.healingFactor = nodo.healingFactor;
             data.dmgFactor = nodo.dmgFactor;
             data.identifier = nodo.identifier;
-            nodosIngresados.Add(nodo);
+            data.turnController = this.gameObject;
+            data.msgGameObject = this.gameObject;
             nodos.Add(nodoActivo);
+            
 
             for (int j = 0; j < data.total_nodes; j++)
             {
@@ -98,12 +102,18 @@ public class Info : MonoBehaviour
             Seleccion_y_Union data = nodos[i].GetComponent<Seleccion_y_Union>();
             for (int j = 0; j < data.total_nodes; j++)
             {
-                if (nodosIngresados[i].objectives.Count < j)
+                data.objectives.Add(null);
+                if (nodosIngresados[i].objectives.Count <= j)
                 {
-                    data.objectives[i] = null;
+                    continue;
                 }
                 else
                 {
+                    Debug.Log("JJJJJ " + j);
+                    Debug.Log("nodos ingresados "+ nodosIngresados[i]);
+                    Debug.Log("objetivos "+ nodosIngresados[i].objectives[j]);
+                    Debug.Log("nodos ingresados " + nodos[nodosIngresados[i].objectives[j]]);
+                    Debug.Log("nodos ingresados " + data.objectives.Count);
                     data.objectives[i] = nodos[nodosIngresados[i].objectives[j]];
                 }
             }
@@ -126,12 +136,16 @@ public class Info : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log(laData.GetComponent<DataPaso>().json);
-        Debug.Log("AAAAAA");
+        GameObject laData = GameObject.Find("DataAGuardar");
+        DataPaso info = laData.GetComponent<DataPaso>();
+        players_number = info.players_number;
+        turn = info.turn;
+        player_turn = info.player_turn;
+        IdSala = info.IdSala;
         if (laData.GetComponent<DataPaso>().json.Count > 0) 
         {
             json = laData.GetComponent<DataPaso>().json;
-            Debug.Log(json);
+            Debug.Log(json[0]);
         }
 
         setup();
