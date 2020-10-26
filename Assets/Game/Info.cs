@@ -39,6 +39,10 @@ public class Info : MonoBehaviour
         n.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         a.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         d.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        e.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        a.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        d.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
     }
 
     private void Start()

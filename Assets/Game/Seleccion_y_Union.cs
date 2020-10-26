@@ -24,6 +24,8 @@ public class Seleccion_y_Union : MonoBehaviour
     public int healingFactor;
     public int dmgFactor;
     public GameObject turnController;
+    public GameObject msgGameObject;
+    float fade = 0;
 
     void CheckType()
     {
@@ -148,6 +150,7 @@ public class Seleccion_y_Union : MonoBehaviour
                 else
                 {
                     //no se completo la union por distancia, por lo tanto se libera el nodo
+                    sendMessage("Too far!");
                     Debug.Log("Union entre" + first + "and" + this.gameObject + "no creada, mucha distancia.");
                     first_code.objectives[index_to_use] = null;
                     first_code.used_nodes -= 1;
@@ -174,7 +177,8 @@ public class Seleccion_y_Union : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log("This node can´t have more nodes");
+                        //Debug.Log("This node can´t have more nodes");
+                        sendMessage("No connections left!");
                     }
                 }
             }
@@ -274,6 +278,17 @@ public class Seleccion_y_Union : MonoBehaviour
         }
     }
 
+    void sendMessage(string message)
+    {
+        msgGameObject.transform.GetChild(0).GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = message;
+        fade = 255;
+    }
+
+    void fadeMsg()
+    {
+        msgGameObject.transform.GetChild(0).GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().faceColor = new Color32(0, 0, 0, (byte)fade);
+    }
+
     void Start()
     {
         CheckType();
@@ -288,5 +303,10 @@ public class Seleccion_y_Union : MonoBehaviour
         AttackDefenseFactorCalculator();
         ChangeColor();
         ChangeHP();
+        if (fade > 0)
+        {
+            fade -= 0.5f;
+            fadeMsg();
+        }
     }
 }
