@@ -17,11 +17,36 @@ public class end_Turn : MonoBehaviour
     {
         Info controller = transform.parent.parent.gameObject.GetComponent<Info>();
         controller.turn++;
-        controller.player_turn++;
-        if(controller.player_turn>controller.players_number)
+        int winCalculator=0;
+        int winner=0;
+        for(int i =0;i<controller.players_number;i++)
         {
-            controller.player_turn=1;
+            if(controller.defeated[i]==false)
+            {
+                winCalculator++;
+                winner=i+1;
+            }
         }
+        if(winCalculator!=1)
+        {
+            while(true)
+            {
+                controller.player_turn++;
+                if(controller.player_turn>controller.players_number)
+                {
+                    controller.player_turn=1;
+                }
+                if(controller.defeated[controller.player_turn-1]==false)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //terminar juego y hacer ganador a: winner
+        }
+        
         controller.refreshNodes();
         /*
         for (int i = 0; i < controller.nodos.Count; i++)
