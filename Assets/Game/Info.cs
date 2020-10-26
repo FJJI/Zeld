@@ -61,9 +61,15 @@ public class Info : MonoBehaviour
 
     public void refreshNodes()
     {
+        defeated=new List<bool> {true,true,true,true};
         foreach (var item in nodos)
         {
             item.GetComponent<Seleccion_y_Union>().turnUpdate();
+            if(item.GetComponent<Seleccion_y_Union>().owner!=0)
+            {
+                defeated[item.GetComponent<Seleccion_y_Union>().owner-1]=false;
+            }
+            
         }
     }
 

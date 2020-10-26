@@ -16,6 +16,7 @@ public class end_Turn : MonoBehaviour
     void OnMouseDown()
     {
         Info controller = transform.parent.parent.gameObject.GetComponent<Info>();
+        controller.refreshNodes();
         controller.turn++;
         int winCalculator=0;
         int winner=0;
@@ -47,7 +48,7 @@ public class end_Turn : MonoBehaviour
             //terminar juego y hacer ganador a: winner
         }
         
-        controller.refreshNodes();
+        
         /*
         for (int i = 0; i < controller.nodos.Count; i++)
         {
