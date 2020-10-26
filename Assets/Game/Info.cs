@@ -39,10 +39,29 @@ public class Info : MonoBehaviour
         n.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         a.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         d.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+
         e.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         n.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         a.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         d.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+
+        e.GetComponent<Seleccion_y_Union>().owner = 1;
+        n.GetComponent<Seleccion_y_Union>().owner = 2;
+        a.GetComponent<Seleccion_y_Union>().owner = 3;
+        d.GetComponent<Seleccion_y_Union>().owner = 4;
+
+        nodos.Add(e);
+        nodos.Add(n);
+        nodos.Add(a);
+        nodos.Add(d);
+    }
+
+    public void refreshNodes()
+    {
+        foreach (var item in nodos)
+        {
+            item.GetComponent<Seleccion_y_Union>().turnUpdate();
+        }
     }
 
     private void Start()

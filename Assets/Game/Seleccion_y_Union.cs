@@ -205,7 +205,7 @@ public class Seleccion_y_Union : MonoBehaviour
         }
         else if (owner == 4)
         {
-            sprite.color = new Color(0f, 0f, 0f, 1);
+            sprite.color = new Color(1f, 0f, 0f, 1);
         }
         if (first == this.gameObject)
         {
@@ -220,41 +220,34 @@ public class Seleccion_y_Union : MonoBehaviour
 
     private void ChangeHP()
     {
-        //demostrative only of modifying the points
-        textObject.GetComponent<TextMeshProUGUI>().text = points.ToString();
-        counter++;
-        if (counter > 400)
+        for (int i = 0; i < total_nodes; i++)
         {
-            for (int i = 0; i < total_nodes; i++)
+            if (objectives[i] != null)
             {
-                if (objectives[i] != null)
+                if (objectives[i].GetComponent<Seleccion_y_Union>().owner == gameObject.GetComponent<Seleccion_y_Union>().owner)
                 {
-                    if (objectives[i].GetComponent<Seleccion_y_Union>().owner == gameObject.GetComponent<Seleccion_y_Union>().owner)
+                    if (objectives[i].GetComponent<Seleccion_y_Union>().points + gameObject.GetComponent<Seleccion_y_Union>().healingFactor <= 100)
                     {
-                        if (objectives[i].GetComponent<Seleccion_y_Union>().points + gameObject.GetComponent<Seleccion_y_Union>().healingFactor <= 100)
-                        {
-                            objectives[i].GetComponent<Seleccion_y_Union>().points += gameObject.GetComponent<Seleccion_y_Union>().healingFactor;
-                        }
-                        else
-                        {
-                            objectives[i].GetComponent<Seleccion_y_Union>().points = 100;
-                        }
+                        objectives[i].GetComponent<Seleccion_y_Union>().points += gameObject.GetComponent<Seleccion_y_Union>().healingFactor;
                     }
                     else
                     {
-                        if (objectives[i].GetComponent<Seleccion_y_Union>().points - gameObject.GetComponent<Seleccion_y_Union>().dmgFactor <= 0)
-                        {
-                            objectives[i].GetComponent<Seleccion_y_Union>().points += gameObject.GetComponent<Seleccion_y_Union>().dmgFactor - objectives[i].GetComponent<Seleccion_y_Union>().points;
-                            objectives[i].GetComponent<Seleccion_y_Union>().owner = gameObject.GetComponent<Seleccion_y_Union>().owner;
-                        }
-                        else
-                        {
-                            objectives[i].GetComponent<Seleccion_y_Union>().points -= gameObject.GetComponent<Seleccion_y_Union>().dmgFactor;
-                        }
+                        objectives[i].GetComponent<Seleccion_y_Union>().points = 100;
+                    }
+                }
+                else
+                {
+                    if (objectives[i].GetComponent<Seleccion_y_Union>().points - gameObject.GetComponent<Seleccion_y_Union>().dmgFactor <= 0)
+                    {
+                        objectives[i].GetComponent<Seleccion_y_Union>().points += gameObject.GetComponent<Seleccion_y_Union>().dmgFactor - objectives[i].GetComponent<Seleccion_y_Union>().points;
+                        objectives[i].GetComponent<Seleccion_y_Union>().owner = gameObject.GetComponent<Seleccion_y_Union>().owner;
+                    }
+                    else
+                    {
+                        objectives[i].GetComponent<Seleccion_y_Union>().points -= gameObject.GetComponent<Seleccion_y_Union>().dmgFactor;
                     }
                 }
             }
-            counter = 0;
         }
     }
 
@@ -300,13 +293,18 @@ public class Seleccion_y_Union : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        AttackDefenseFactorCalculator();
+        textObject.GetComponent<TextMeshProUGUI>().text = points.ToString();
         ChangeColor();
-        ChangeHP();
         if (fade > 0)
         {
             fade -= 0.5f;
             fadeMsg();
         }
+    }
+
+    public void turnUpdate()
+    {
+        AttackDefenseFactorCalculator();
+        ChangeHP();
     }
 }
