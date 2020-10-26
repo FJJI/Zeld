@@ -11,20 +11,21 @@ public class RoomScript : MonoBehaviour
 {
 
     public Button readyButton, startButton, leaveButton, sendButton, backProfileButton;
-    public Text idLabel, playersLabel, friendName, friendLoses, friendWins, prefFriend, friendPrefU, nemesisFriend;
+    public Text idLabel, playersLabel, friendName, friendLoses, friendWins, prefFriend, friendPrefU, nemesisFriend, Message;
     public InputField chatInput;
     public GameObject chatView, playersView, chatRow, playersRow;
     public Canvas roomCanvas, profileCanvas;
     public Transform chatContent, playersContent;
     private DatabaseReference reference;
     private FirebaseDatabase dbInstance;
-    public string logged_key;
+    public string logged_key, room_owner;
     public string roomId, errorMessage;
     public string fname, floses, fwins, fnemesis, fprefg, ffavu;
     public List<PlayerClass> room_players;
     public List<int> id_players;
     public bool ready;
     public long capacity;
+    public int ready_players;
 
     void Start()
     {
@@ -36,6 +37,7 @@ public class RoomScript : MonoBehaviour
         room_players = new List<PlayerClass>();
         capacity = 0;
         ready = false;
+        ready_players = 0;
         errorMessage = "";
         fname = "";
         floses = "";
@@ -47,12 +49,33 @@ public class RoomScript : MonoBehaviour
         dbInstance.GetReference("rooms").Child(roomId).Child("messages").ChildAdded += HandleMessageAdded;
         dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildAdded += HandlePLayerAdded;
         dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildRemoved += HandlePlayerRemoved;
+        dbInstance.GetReference("rooms").Child(roomId).Child("players").ChildChanged += HandlePlayerEdited;
         sendButton.onClick.AddListener(() => SenderChat(chatInput.text));
         leaveButton.onClick.AddListener(() => LeavePress());
         readyButton.onClick.AddListener(() => ReadyPress());
+        startButton.onClick.AddListener(() => StartGame());
         backProfileButton.onClick.AddListener(() => HideProfileCanvas());
     }
 
+    void HandlePlayerEdited(object sender, ChildChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        DataSnapshot msg = args.Snapshot;
+        IDictionary dictPlayer = (IDictionary)msg.Value;
+        if (dictPlayer["ready"].ToString() == "true")
+        {
+            ready_players += 1;
+        }
+        else 
+        {
+            ready_players -= 1;
+        }
+        playersLabel.text = "Players" + ready_players.ToString() + "/4";
+    }
     void HandleMessageAdded(object sender, ChildChangedEventArgs args)
     {
         if (args.DatabaseError != null)
@@ -78,16 +101,35 @@ public class RoomScript : MonoBehaviour
         }
         DataSnapshot data = args.Snapshot;
         IDictionary dictPlayer = (IDictionary)data.Value;
+        string temp_name = dictPlayer["username"].ToString();
         PlayerClass p_row = new PlayerClass(dictPlayer["username"].ToString(), dictPlayer["ready"].ToString());
         GameObject SpawnedItem = Instantiate(playersRow);
         SpawnedItem.transform.SetParent(playersContent, false);
         SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = p_row.username;
-        SpawnedItem.transform.GetChild(1).GetComponent<Text>().text = p_row.ready.ToString();
+        SpawnedItem.transform.GetChild(1).GetComponent<Text>().text = " ";
+        SpawnedItem.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => DisplayProfile(temp_name));
     }
 
     void HandlePlayerRemoved(object sender, ChildChangedEventArgs args)
     {
-         
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        DataSnapshot data = args.Snapshot;
+        IDictionary dictPlayer = (IDictionary)data.Value;
+        foreach (GameObject child in playersContent)
+        {
+            if (child.transform.GetChild(0).GetComponent<Text>().text == dictPlayer["username"].ToString())
+            {
+                child.SetActive(false);
+            }
+        }
+        if (data.Key == room_owner)
+        {
+            SceneManager.LoadScene("MainMenu");
+        }
     }
 
     public async void SetupDisplay()
@@ -97,6 +139,8 @@ public class RoomScript : MonoBehaviour
             DataSnapshot snapshot = task.Result;
             IDictionary room = (IDictionary)snapshot.Value;
             capacity = long.Parse(room["roomSize"].ToString());
+            room_owner = room["owner"].ToString();
+
         });
         await dbInstance.GetReference("rooms").Child(roomId).Child("players").GetValueAsync().ContinueWith(task =>
         {
@@ -120,14 +164,24 @@ public class RoomScript : MonoBehaviour
             string temp_name = room_players[i].username;
             SpawnedItem.transform.SetParent(playersContent, false);
             SpawnedItem.transform.GetChild(0).GetComponent<Text>().text = temp_name;
-            SpawnedItem.transform.GetChild(1).GetComponent<Text>().text = room_players[i].ready.ToString();
+            SpawnedItem.transform.GetChild(1).GetComponent<Text>().text = " ";
             SpawnedItem.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => DisplayProfile(temp_name));
         }
     }
 
     public async void ReadyPress()
     {
-        await reference.Child("rooms").Child(roomId).Child("players").Child(logged_key).Child("ready").SetValueAsync("true");
+        if (ready == false)
+        {
+            await reference.Child("rooms").Child(roomId).Child("players").Child(logged_key).Child("ready").SetValueAsync("true");
+            ready = true;
+        }
+        else
+        {
+            await reference.Child("rooms").Child(roomId).Child("players").Child(logged_key).Child("ready").SetValueAsync("false");
+            ready = false;
+        }
+        
     }
 
     public async void LeavePress()
@@ -138,6 +192,7 @@ public class RoomScript : MonoBehaviour
 
     public async void StartGame()
     {
+        Message.text = "";
         await dbInstance.GetReference("rooms").Child(roomId).Child("players").GetValueAsync().ContinueWith(task =>
         {
             if (task.IsFaulted) { }
@@ -169,7 +224,7 @@ public class RoomScript : MonoBehaviour
         });
         if (ready == false)
         {
-            //display message; 
+            Message.text = errorMessage; 
             return;   
         }
         //start game
