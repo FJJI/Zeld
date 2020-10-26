@@ -82,7 +82,14 @@ public class Seleccion_y_Union : MonoBehaviour
                         //ya existe, elimino la flecha y libero el cupo
                         first_code.used_nodes -= 1;
                         int pointsToAdd = (int)(100f * Vector2.Distance(gameObject.transform.position, first_code.transform.position) / Camera.main.GetComponent<CameraSize>().camWidth);
-                        first_code.points += pointsToAdd;
+                        if(first_code.points+pointsToAdd>=100)
+                        {
+                            first_code.points=100;
+                        }
+                        else
+                        {
+                            first_code.points += pointsToAdd;
+                        }
                         first_code.objectives[i] = null;
                         Destroy(first_code.unions[i].gameObject);
                         first_code.unions[i] = null;
@@ -141,7 +148,7 @@ public class Seleccion_y_Union : MonoBehaviour
                 {
                     GameObject g = Instantiate(arrow, new Vector3(middleX, middleY, transform.position.z), Quaternion.identity);
                     g.transform.Rotate(0, 0, angle - 90);
-                    g.transform.localScale = new Vector3(0.3f, 0.15f * colliderDist, 1); //the minus parameter avoid the arrow to enter into the circle
+                    g.transform.localScale = new Vector3(0.3f, 0.15f * colliderDist, 1);
                     first_code.unions[index_to_use] = g;
                     Debug.Log("Union entre" + first + "and" + this.gameObject);
                     first.GetComponent<Seleccion_y_Union>().points -= (int)(100f * distTotal / Camera.main.GetComponent<CameraSize>().camWidth);
