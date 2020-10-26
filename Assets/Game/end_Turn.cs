@@ -1,7 +1,11 @@
 ﻿using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using System;
 
 public class Nodo
 {
@@ -18,10 +22,8 @@ public class Nodo
     public int dmgFactor;
     public int identifier;
     public List<int> objectives;
-    public Nodo(GameObject nodo, int identifier)
+    public Nodo(GameObject nodo)
     {
-        this.identifier = identifier;
-
         this.posx = nodo.transform.position.x;
         this.posy = nodo.transform.position.y;
         this.posz = nodo.transform.position.z;
@@ -34,6 +36,8 @@ public class Nodo
         this.owner = data.owner;
         this.healingFactor = data.healingFactor;
         this.dmgFactor = data.dmgFactor;
+        this.identifier = data.identifier;
+
 
         objectives = new List<int>();
     }
@@ -47,6 +51,7 @@ public class end_Turn : MonoBehaviour
 {
     Info controller;
     List<Nodo> nodos = new List<Nodo>();
+    public GameObject laData;
     public List<string> many_jsons;
 
     void OnMouseDown()
@@ -92,7 +97,7 @@ public class end_Turn : MonoBehaviour
     {
         for (int i = 0; i < controller.nodos.Count; i++)
         {
-            Nodo nodo = new Nodo(controller.nodos[i], i);
+            Nodo nodo = new Nodo(controller.nodos[i]);
             nodos.Add(nodo);
 
         }
@@ -110,7 +115,6 @@ public class end_Turn : MonoBehaviour
                     if (nodo_base.GetComponent<Seleccion_y_Union>().objectives[j] == nodo_Objetivo)
                     {
                         nodos[i].addObj(j);
-                        Debug.Log("NANI");
                         break;
                     }
                 }
@@ -126,6 +130,8 @@ public class end_Turn : MonoBehaviour
         {
             Debug.Log(many_jsons[i]);
         }
+        laData.GetComponent<DataPaso>().json = many_jsons.Select(x => x).ToList();
+        //SceneManager.LoadScene("baserino");
     }
 
     void Start()

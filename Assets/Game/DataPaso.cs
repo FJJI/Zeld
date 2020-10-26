@@ -5,9 +5,10 @@ using UnityEngine;
 public class DataPaso : MonoBehaviour
 {
     public static DataPaso dataPaso;
-    public static int Playing; 
+    public static int Playing;
     // Este es el jugador que va a estar jugando (segun id en la partida se de si es el j1 o j2)
-
+    public List<string> json;
+    
     void Awake()
     {
         if (dataPaso == null)
@@ -36,10 +37,8 @@ public class DataPaso : MonoBehaviour
         public int dmgFactor;
         public int identifier;
         public List<int> objectives;
-        public Nodo(GameObject nodo, int identifier)
+        public Nodo(GameObject nodo)
         {
-            this.identifier = identifier;
-
             this.posx = nodo.transform.position.x;
             this.posy = nodo.transform.position.y;
             this.posz = nodo.transform.position.z;
@@ -52,6 +51,7 @@ public class DataPaso : MonoBehaviour
             this.owner = data.owner;
             this.healingFactor = data.healingFactor;
             this.dmgFactor = data.dmgFactor;
+            this.identifier = data.identifier;
 
             objectives = new List<int>();
         }

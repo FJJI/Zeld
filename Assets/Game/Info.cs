@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Info : MonoBehaviour
@@ -11,22 +12,27 @@ public class Info : MonoBehaviour
     public GameObject Ataque;
     public GameObject Defensa;
     public List<bool> defeated;
+    public List<GameObject> tipoNodos;
+    public GameObject laData;
 
     //datos para la partida
     public int players_number; // cuantos players hay en la partida 
     public int turn; // Cuantos Turnos LLevamos
     public int player_turn; // De Quien es el turno 
 
+    public List<string> json;
+    public List<Nodo> nodosIngresados;
+
     void setup()
     {
-        Debug.Log(nodos.Count);
-        if (nodos.Count == 0)
+        Debug.Log(json.Count);
+        if (json.Count == 0)
         {
             defaultstart(); // si es la primera vez se abre la partida, creamos lugares por default
         }
         else
         {
-
+            fixedStart();
         }
     }
 
@@ -51,12 +57,57 @@ public class Info : MonoBehaviour
         a.GetComponent<Seleccion_y_Union>().owner = 3;
         d.GetComponent<Seleccion_y_Union>().owner = 4;
 
+        e.GetComponent<Seleccion_y_Union>().identifier = 0;
+        n.GetComponent<Seleccion_y_Union>().identifier = 1;
+        a.GetComponent<Seleccion_y_Union>().identifier = 2;
+        d.GetComponent<Seleccion_y_Union>().identifier = 3;
+
         nodos.Add(e);
         nodos.Add(n);
         nodos.Add(a);
         nodos.Add(d);
 
         defeated = new List<bool> { false, false, false, false }; // si saber quien pierde
+    }
+
+    public void fixedStart()
+    {
+        for (int i = 0; i < json.Count; i++)
+        {
+            Nodo nodo = JsonUtility.FromJson<Nodo>(json[i]);
+            GameObject nodoActivo = Instantiate(tipoNodos[nodo.type], new Vector3(nodo.posx, nodo.posy, nodo.posz), Quaternion.identity);
+            Seleccion_y_Union data = nodoActivo.GetComponent<Seleccion_y_Union>();
+            data.points = nodo.points;
+            data.total_nodes = nodo.total_nodes;
+            data.used_nodes = nodo.used_nodes;
+            data.owner = nodo.owner;
+            data.healingFactor = nodo.healingFactor;
+            data.dmgFactor = nodo.dmgFactor;
+            data.identifier = nodo.identifier;
+            nodosIngresados.Add(nodo);
+            nodos.Add(nodoActivo);
+
+            for (int j = 0; j < data.total_nodes; j++)
+            {
+                //hi
+            }
+        }
+
+        for (int i = 0; i < json.Count; i++)
+        {
+            Seleccion_y_Union data = nodos[i].GetComponent<Seleccion_y_Union>();
+            for (int j = 0; j < data.total_nodes; j++)
+            {
+                if (nodosIngresados[i].objectives.Count < j)
+                {
+                    data.objectives[i] = null;
+                }
+                else
+                {
+                    data.objectives[i] = nodos[nodosIngresados[i].objectives[j]];
+                }
+            }
+        }
     }
 
     public void refreshNodes()
@@ -75,6 +126,14 @@ public class Info : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log(laData.GetComponent<DataPaso>().json);
+        Debug.Log("AAAAAA");
+        if (laData.GetComponent<DataPaso>().json.Count > 0) 
+        {
+            json = laData.GetComponent<DataPaso>().json;
+            Debug.Log(json);
+        }
+
         setup();
     }
 

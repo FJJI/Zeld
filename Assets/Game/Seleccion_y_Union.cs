@@ -25,6 +25,7 @@ public class Seleccion_y_Union : MonoBehaviour
     public int dmgFactor;
     public GameObject turnController;
     public GameObject msgGameObject;
+    public int identifier;
     float fade = 0;
 
     void CheckType()

@@ -20,4 +20,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/RoomScene.unity
     guid: 9119d2e1d04c0254e935cc0e40c52427
+  - enabled: 1
+    path: Assets/Game/ZeldGame.unity
+    guid: 707255d4000c92c4eabb7761802a1f4c
+  - enabled: 1
+    path: Assets/Game/baserino.unity
+    guid: f1caf7a187aae51428c0630021f69659
   m_configObjects: {}

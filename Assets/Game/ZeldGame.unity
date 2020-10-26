@@ -121,6 +121,12 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &194761365 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5899299421073533181, guid: d0b8269ca750e1a4183cf5929c5e24cf,
+    type: 3}
+  m_PrefabInstance: {fileID: 3853667718580534700}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &312223686
 GameObject:
   m_ObjectHideFlags: 0
@@ -168,12 +174,16 @@ MonoBehaviour:
   nodos: []
   posiciones: []
   Normal: {fileID: 8962873443639638279, guid: 8921c2ca3f7b52549b5ff45be5a0a4d9, type: 3}
-  Extra: {fileID: 1169268234281552989, guid: f977fed8f7735fa458e14754724d1f26, type: 3}
-  Ataque: {fileID: 40449514753517188, guid: 6fea8b4489cdbe946bc22339fce33df0, type: 3}
-  Defensa: {fileID: 6779469752411818588, guid: 1eb38d34e2e6da349a4d57b67e3a5441, type: 3}
+  Extra: {fileID: 40449514753517188, guid: 6fea8b4489cdbe946bc22339fce33df0, type: 3}
+  Ataque: {fileID: 6779469752411818588, guid: 1eb38d34e2e6da349a4d57b67e3a5441, type: 3}
+  Defensa: {fileID: 1169268234281552989, guid: f977fed8f7735fa458e14754724d1f26, type: 3}
+  defeated: 
+  tipoNodos: []
+  laData: {fileID: 194761365}
   players_number: 0
   turn: 0
   player_turn: 0
+  json: []
 --- !u!1 &398479213
 GameObject:
   m_ObjectHideFlags: 0
@@ -458,6 +468,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c56f43d4106cb134c941135a579b0a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  laData: {fileID: 194761365}
+  many_jsons: []
 --- !u!114 &787277683
 MonoBehaviour:
   m_ObjectHideFlags: 0
