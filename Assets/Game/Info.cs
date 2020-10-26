@@ -127,7 +127,9 @@ public class Info : MonoBehaviour
             data.turnController = this.gameObject;
             data.msgGameObject = this.gameObject;
             nodos.Add(nodoActivo);
-            
+            Debug.Log(nodo.points + " Nodo Points");
+            Debug.Log(data.points + " Data Points");
+
 
             for (int j = 0; j < data.total_nodes; j++)
             {
@@ -151,7 +153,9 @@ public class Info : MonoBehaviour
                     {
                         Debug.Log(data.objectives.Count + " i " + i + "aaa " + nodosIngresados[i].objectives[j]);
                         data.objectives[i] = nodos[nodosIngresados[i].objectives[j]];
-                        //data.objectives[i].GetComponent<Seleccion_y_Union>().ArrowCreation(j, data, nodos[i]);
+                        Seleccion_y_Union.first = nodos[i];
+                        data.objectives[i].GetComponent<Seleccion_y_Union>().ArrowCreation(j, data, Seleccion_y_Union.first);
+                        Seleccion_y_Union.first = null;
                     }
                 } catch { continue; }
             }
