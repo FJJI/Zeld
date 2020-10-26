@@ -132,15 +132,23 @@ public class end_Turn : MonoBehaviour
         }
         laData = GameObject.Find("DataAGuardar");
         laData.GetComponent<DataPaso>().json = many_jsons.Select(x => x).ToList();
+        laData.GetComponent<DataPaso>().turn = controller.turn;
+        laData.GetComponent<DataPaso>().player_turn = controller.player_turn;
+        laData.GetComponent<DataPaso>().players_number = controller.players_number;
         SceneManager.LoadScene("baserino");
     }
 
     void Start()
     {
+
         controller = transform.parent.parent.gameObject.GetComponent<Info>();
-        controller.turn=1;
-        controller.player_turn=1;
-        controller.players_number=4;
+        GameObject laData = GameObject.Find("DataAGuardar");
+        if (laData.GetComponent<DataPaso>().json.Count == 0)
+        {
+            controller.turn = 1;
+            controller.player_turn = 1;
+            controller.players_number = 4;
+        }
         
     }
 
