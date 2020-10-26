@@ -3,19 +3,55 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public class Nodo
+{
+    public float posx;
+    public float posy;
+    public float posz;
+
+    public int type;
+    public int points;
+    public int total_nodes;
+    public int used_nodes;
+    public int owner;
+    public int healingFactor;
+    public int dmgFactor;
+    public int identifier;
+    public List<int> objectives;
+    public Nodo(GameObject nodo, int identifier)
+    {
+        this.identifier = identifier;
+
+        this.posx = nodo.transform.position.x;
+        this.posy = nodo.transform.position.y;
+        this.posz = nodo.transform.position.z;
+
+        Seleccion_y_Union data = nodo.GetComponent<Seleccion_y_Union>();
+        this.type = data.type;
+        this.points = data.points;
+        this.total_nodes = data.total_nodes;
+        this.used_nodes = data.used_nodes;
+        this.owner = data.owner;
+        this.healingFactor = data.healingFactor;
+        this.dmgFactor = data.dmgFactor;
+
+        objectives = new List<int>();
+    }
+    public void addObj(int data)
+    {
+        objectives.Add(data);
+    }
+}
+
 public class end_Turn : MonoBehaviour
 {
     Info controller;
-    List<int> remaining = new List<int> { 0,0,0,0 };
-    List<float> posx;
-    List<float> posy;
-    List<float> posz;
-    List<int> type_node;
-
+    List<Nodo> nodos = new List<Nodo>();
+    public List<string> many_jsons;
 
     void OnMouseDown()
     {
-        Info controller = transform.parent.parent.gameObject.GetComponent<Info>();
+        controller = transform.parent.parent.gameObject.GetComponent<Info>();
         controller.refreshNodes();
         controller.turn++;
         int winCalculator=0;
@@ -47,22 +83,48 @@ public class end_Turn : MonoBehaviour
         {
             //terminar juego y hacer ganador a: winner
         }
-        
-        
-        /*
-        for (int i = 0; i < controller.nodos.Count; i++)
-        {
-            remaining[controller.nodos[i].GetComponent<Seleccion_y_Union>().owner]++;
-        }
+
+        Debug.Log(controller.nodos);
         PrepareData();
-        */
     }
 
     void PrepareData()
     {
         for (int i = 0; i < controller.nodos.Count; i++)
         {
-            type_node.Add(controller.nodos[i].GetComponent<Seleccion_y_Union>().type);
+            Nodo nodo = new Nodo(controller.nodos[i], i);
+            nodos.Add(nodo);
+
+        }
+        //falta objectives
+        //hacemos de nuevo el for para que ahora que estan creados, sacar los objetivos por referencia
+        for (int i = 0; i < controller.nodos.Count; i++)
+        {
+            GameObject nodo_base = controller.nodos[i];
+            for (int j = 0; j < controller.nodos[i].GetComponent<Seleccion_y_Union>().total_nodes; j++)
+            {
+                //necesito equiparar los nodos 
+                for (int k = 0; k < controller.nodos.Count; k++)
+                {
+                    GameObject nodo_Objetivo = controller.nodos[k];
+                    if (nodo_base.GetComponent<Seleccion_y_Union>().objectives[j] == nodo_Objetivo)
+                    {
+                        nodos[i].addObj(j);
+                        Debug.Log("NANI");
+                        break;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < nodos.Count; i++)
+        {
+            string jsonStr = JsonUtility.ToJson(nodos[i]);
+            many_jsons.Add(jsonStr);
+        }
+        Debug.Log(many_jsons);
+        for (int i = 0; i < nodos.Count; i++)
+        {
+            Debug.Log(many_jsons[i]);
         }
     }
 
