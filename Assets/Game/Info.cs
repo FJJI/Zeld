@@ -70,6 +70,17 @@ public class Info : MonoBehaviour
         n6.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         n7.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
 
+        e.GetComponent<Seleccion_y_Union>().points = 50;
+        n.GetComponent<Seleccion_y_Union>().points = 50;
+        a.GetComponent<Seleccion_y_Union>().points = 50;
+        d.GetComponent<Seleccion_y_Union>().points = 50;
+        n2.GetComponent<Seleccion_y_Union>().points = 50;
+        n3.GetComponent<Seleccion_y_Union>().points = 50;
+        n4.GetComponent<Seleccion_y_Union>().points = 50;
+        n5.GetComponent<Seleccion_y_Union>().points = 50;
+        n6.GetComponent<Seleccion_y_Union>().points = 50;
+        n7.GetComponent<Seleccion_y_Union>().points = 50;
+
         e.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         n.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         a.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
