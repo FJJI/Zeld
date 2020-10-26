@@ -227,7 +227,7 @@ public class RoomScript : MonoBehaviour
             Message.text = errorMessage; 
             return;   
         }
-        //start game
+        SceneManager.LoadScene("ZeldGame");
     }
 
     public async void SenderChat(string content)
