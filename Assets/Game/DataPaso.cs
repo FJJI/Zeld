@@ -14,6 +14,7 @@ public class DataPaso : MonoBehaviour
     public int turn; // Cuantos Turnos LLevamos
     public int player_turn; // De Quien es el turno 
     public int IdSala;
+    public List<bool> defeated;
 
     void Awake()
     {

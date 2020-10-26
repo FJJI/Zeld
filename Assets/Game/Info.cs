@@ -145,7 +145,7 @@ public class Info : MonoBehaviour
         if (laData.GetComponent<DataPaso>().json.Count > 0) 
         {
             json = laData.GetComponent<DataPaso>().json;
-            Debug.Log(json[0]);
+
         }
 
         setup();
