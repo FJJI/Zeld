@@ -21,6 +21,9 @@ public class Seleccion_y_Union : MonoBehaviour
     public Component halo;
     public SpriteRenderer sprite;
     public int owner; // 0 if neutral, else to playerN
+    public int healingFactor;
+    public int dmgFactor;
+    public GameObject turnController;
 
     void CheckType()
     {
@@ -40,8 +43,11 @@ public class Seleccion_y_Union : MonoBehaviour
     {
         if (!first)
         {
-            Debug.Log("Seleccionado" + this.gameObject);
-            first = this.transform.gameObject;
+            if (turnController.GetComponent<Info>().player_turn == owner)
+            {
+                Debug.Log("Seleccionado" + this.gameObject);
+                first = this.transform.gameObject;
+            }
         }
         else if (first == this.transform.gameObject)
         {
@@ -49,11 +55,15 @@ public class Seleccion_y_Union : MonoBehaviour
             Debug.Log("Todos los nodos eliminados" + this.gameObject);
             for (int i = 0; i < total_nodes; i++)
             {
-                used_nodes -= 1;
+                if (objectives[i] != null)
+                {
+                    points += (int)(100f * Vector2.Distance(transform.position, objectives[i].transform.position) / Camera.main.GetComponent<CameraSize>().camWidth);
+                }
                 objectives[i] = null;
                 try { Destroy(unions[i].gameObject); } catch { }
                 unions[i] = null;
             }
+            used_nodes = 0;
             first = null;
         }
         else if (first != this.transform.gameObject)
@@ -69,6 +79,8 @@ public class Seleccion_y_Union : MonoBehaviour
                     {
                         //ya existe, elimino la flecha y libero el cupo
                         first_code.used_nodes -= 1;
+                        int pointsToAdd = (int)(100f * Vector2.Distance(gameObject.transform.position, first_code.transform.position) / Camera.main.GetComponent<CameraSize>().camWidth);
+                        first_code.points += pointsToAdd;
                         first_code.objectives[i] = null;
                         Destroy(first_code.unions[i].gameObject);
                         first_code.unions[i] = null;
@@ -91,7 +103,7 @@ public class Seleccion_y_Union : MonoBehaviour
                     }
                 }
                 //finalmente, casteo la linea
-                Debug.Log(first.transform.position);
+                //Debug.Log(first.transform.position);
                 float distTotal = Vector2.Distance(first.transform.position, transform.position);
                 float distX = Math.Abs(first.transform.position.x - transform.position.x);
                 float distY = Math.Abs(first.transform.position.y - transform.position.y);
@@ -123,22 +135,25 @@ public class Seleccion_y_Union : MonoBehaviour
                     angle += (90 - angle) * 2;
                 }
                 Debug.Log("angulo: " + angle);
-                GameObject g = Instantiate(arrow, new Vector3(middleX, middleY, transform.position.z), Quaternion.identity);
-                /*
-                //find the vector pointing from our position to the target
-                Vector3 _direction = (Target.position - transform.position).normalized;
+                if ((int)(100f * distTotal / Camera.main.GetComponent<CameraSize>().camWidth) <= first.GetComponent<Seleccion_y_Union>().points)
+                {
+                    GameObject g = Instantiate(arrow, new Vector3(middleX, middleY, transform.position.z), Quaternion.identity);
+                    g.transform.Rotate(0, 0, angle - 90);
+                    g.transform.localScale = new Vector3(0.3f, 0.15f * colliderDist, 1); //the minus parameter avoid the arrow to enter into the circle
+                    first_code.unions[index_to_use] = g;
+                    Debug.Log("Union entre" + first + "and" + this.gameObject);
+                    first.GetComponent<Seleccion_y_Union>().points -= (int)(100f * distTotal / Camera.main.GetComponent<CameraSize>().camWidth);
+                    first = null;
+                }
+                else
+                {
+                    //no se completo la union por distancia, por lo tanto se libera el nodo
+                    Debug.Log("Union entre" + first + "and" + this.gameObject + "no creada, mucha distancia.");
+                    first_code.objectives[index_to_use] = null;
+                    first_code.used_nodes -= 1;
+                    first = null;
+                }
 
-                //create the rotation we need to be in to look at the target
-                _lookRotation = Quaternion.LookRotation(_direction);
-
-                //rotate us over time according to speed until we are in the required rotation
-                transform.rotation = Quaternion.Slerp(transform.rotation, _lookRotation, Time.deltaTime * RotationSpeed);
-                */
-                g.transform.Rotate(0, 0, angle - 90);
-                g.transform.localScale = new Vector3(0.3f, 0.15f * distTotal - 0.3f, 1); //the minus parameter avoid the arrow to enter into the circle
-                first_code.unions[index_to_use] = g;
-                Debug.Log("Union entre" + first + "and" + this.gameObject);
-                first = null;
 
 
             }
@@ -165,7 +180,6 @@ public class Seleccion_y_Union : MonoBehaviour
             }
         }
     }
-
     void ChangeColor()
     {
         #region Colores y halo
@@ -205,10 +219,58 @@ public class Seleccion_y_Union : MonoBehaviour
         //demostrative only of modifying the points
         textObject.GetComponent<TextMeshProUGUI>().text = points.ToString();
         counter++;
-        if (objectives[0] != null && counter > 400)
+        if (counter > 400)
         {
-            objectives[0].GetComponent<Seleccion_y_Union>().points--;
+            for (int i = 0; i < total_nodes; i++)
+            {
+                if (objectives[i] != null)
+                {
+                    if (objectives[i].GetComponent<Seleccion_y_Union>().owner == gameObject.GetComponent<Seleccion_y_Union>().owner)
+                    {
+                        if (objectives[i].GetComponent<Seleccion_y_Union>().points + gameObject.GetComponent<Seleccion_y_Union>().healingFactor <= 100)
+                        {
+                            objectives[i].GetComponent<Seleccion_y_Union>().points += gameObject.GetComponent<Seleccion_y_Union>().healingFactor;
+                        }
+                        else
+                        {
+                            objectives[i].GetComponent<Seleccion_y_Union>().points = 100;
+                        }
+                    }
+                    else
+                    {
+                        if (objectives[i].GetComponent<Seleccion_y_Union>().points - gameObject.GetComponent<Seleccion_y_Union>().dmgFactor <= 0)
+                        {
+                            objectives[i].GetComponent<Seleccion_y_Union>().points += gameObject.GetComponent<Seleccion_y_Union>().dmgFactor - objectives[i].GetComponent<Seleccion_y_Union>().points;
+                            objectives[i].GetComponent<Seleccion_y_Union>().owner = gameObject.GetComponent<Seleccion_y_Union>().owner;
+                        }
+                        else
+                        {
+                            objectives[i].GetComponent<Seleccion_y_Union>().points -= gameObject.GetComponent<Seleccion_y_Union>().dmgFactor;
+                        }
+                    }
+                }
+            }
             counter = 0;
+        }
+    }
+
+
+    void AttackDefenseFactorCalculator()
+    {
+        if (gameObject.GetComponent<Seleccion_y_Union>().type == 1)
+        {
+            gameObject.GetComponent<Seleccion_y_Union>().dmgFactor = (int)Mathf.Sqrt(points) * 2;
+            gameObject.GetComponent<Seleccion_y_Union>().healingFactor = (int)Mathf.Sqrt(points);
+        }
+        else if (gameObject.GetComponent<Seleccion_y_Union>().type == 2)
+        {
+            gameObject.GetComponent<Seleccion_y_Union>().dmgFactor = (int)Mathf.Sqrt(points);
+            gameObject.GetComponent<Seleccion_y_Union>().healingFactor = (int)Mathf.Sqrt(points) * 2;
+        }
+        else
+        {
+            gameObject.GetComponent<Seleccion_y_Union>().dmgFactor = (int)Mathf.Sqrt(points);
+            gameObject.GetComponent<Seleccion_y_Union>().healingFactor = (int)Mathf.Sqrt(points);
         }
     }
 
@@ -219,9 +281,11 @@ public class Seleccion_y_Union : MonoBehaviour
         textObject.GetComponent<TextMeshProUGUI>().text = points.ToString();
     }
 
+
     // Update is called once per frame
     void Update()
     {
+        AttackDefenseFactorCalculator();
         ChangeColor();
         ChangeHP();
     }
