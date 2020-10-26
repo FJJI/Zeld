@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Firebase;
+using Firebase.Database;
+using Firebase.Unity.Editor;
 using UnityEngine.UI;
 using System;
 
@@ -53,6 +56,8 @@ public class end_Turn : MonoBehaviour
     List<Nodo> nodos = new List<Nodo>();
     public GameObject laData;
     public List<string> many_jsons;
+    private DatabaseReference reference;
+    private FirebaseDatabase dbInstance;
 
     void OnMouseDown()
     {
@@ -136,6 +141,8 @@ public class end_Turn : MonoBehaviour
         laData.GetComponent<DataPaso>().player_turn = controller.player_turn;
         laData.GetComponent<DataPaso>().players_number = controller.players_number;
         laData.GetComponent<DataPaso>().defeated = controller.defeated;
+        string json = JsonUtility.ToJson(many_jsons);
+        reference.Child("game").Child(PlayerPrefs.GetString("Room")).Child("status").SetRawJsonValueAsync(json);
         SceneManager.LoadScene("baserino");
     }
 
@@ -144,6 +151,9 @@ public class end_Turn : MonoBehaviour
 
         controller = transform.parent.parent.gameObject.GetComponent<Info>();
         GameObject laData = GameObject.Find("DataAGuardar");
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://zeld-e907d.firebaseio.com/");
+        reference = FirebaseDatabase.DefaultInstance.RootReference; //escritura
+        dbInstance = FirebaseDatabase.DefaultInstance; //lectura
         if (laData.GetComponent<DataPaso>().json.Count == 0)
         {
             controller.turn = 1;

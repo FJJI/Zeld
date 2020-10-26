@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
+using Firebase;
+using Firebase.Database;
+using Firebase.Unity.Editor;
 using UnityEngine;
 
 public class Info : MonoBehaviour
@@ -14,6 +17,9 @@ public class Info : MonoBehaviour
     public List<bool> defeated;
     public List<GameObject> tipoNodos = new List<GameObject>();
     public GameObject laData;
+    private DatabaseReference reference;
+    private FirebaseDatabase dbInstance;
+
 
     //datos para la partida
     public int players_number; // cuantos players hay en la partida 
@@ -138,6 +144,9 @@ public class Info : MonoBehaviour
     {
         GameObject laData = GameObject.Find("DataAGuardar");
         DataPaso info = laData.GetComponent<DataPaso>();
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://zeld-e907d.firebaseio.com/");
+        reference = FirebaseDatabase.DefaultInstance.RootReference; //escritura
+        dbInstance = FirebaseDatabase.DefaultInstance; //lectura
         players_number = info.players_number;
         turn = info.turn;
         player_turn = info.player_turn;
