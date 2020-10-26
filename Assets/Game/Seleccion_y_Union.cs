@@ -59,7 +59,15 @@ public class Seleccion_y_Union : MonoBehaviour
             {
                 if (objectives[i] != null)
                 {
-                    points += (int)(100f * Vector2.Distance(transform.position, objectives[i].transform.position) / Camera.main.GetComponent<CameraSize>().camWidth);
+                    int pointsToAdd = (int)(100f * Vector2.Distance(transform.position, objectives[i].transform.position) / Camera.main.GetComponent<CameraSize>().camWidth);
+                    if(points+pointsToAdd>=100)
+                    {
+                        points=100;
+                    }
+                    else
+                    {
+                        points+=pointsToAdd;
+                    }
                 }
                 objectives[i] = null;
                 try { Destroy(unions[i].gameObject); } catch { }
