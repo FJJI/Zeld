@@ -10,6 +10,7 @@ public class Info : MonoBehaviour
     public GameObject Extra;
     public GameObject Ataque;
     public GameObject Defensa;
+    public List<bool> defeated;
 
     //datos para la partida
     public int players_number; // cuantos players hay en la partida 
@@ -54,6 +55,8 @@ public class Info : MonoBehaviour
         nodos.Add(n);
         nodos.Add(a);
         nodos.Add(d);
+
+        defeated = new List<bool> { false, false, false, false }; // si saber quien pierde
     }
 
     public void refreshNodes()
