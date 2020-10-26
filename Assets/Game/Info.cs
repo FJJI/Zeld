@@ -49,30 +49,68 @@ public class Info : MonoBehaviour
         GameObject n = Instantiate(Extra, new Vector3(7, -3, -1), Quaternion.identity);
         GameObject a = Instantiate(Ataque, new Vector3(-7, 3, -1), Quaternion.identity);
         GameObject d = Instantiate(Defensa, new Vector3(-7, -3, -1), Quaternion.identity);
+        GameObject n2 = Instantiate(Normal, new Vector3(4, -2, -1), Quaternion.identity);
+        GameObject n3 = Instantiate(Normal, new Vector3(4, 2, -1), Quaternion.identity);
+        GameObject n4 = Instantiate(Normal, new Vector3(-4, -2, -1), Quaternion.identity);
+        GameObject n5 = Instantiate(Normal, new Vector3(-4, 2, -1), Quaternion.identity);
+        GameObject n6 = Instantiate(Normal, new Vector3(0, 3, -1), Quaternion.identity);
+        GameObject n7 = Instantiate(Normal, new Vector3(0, -3, -1), Quaternion.identity);
+
+
         e.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         n.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         a.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
         d.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        n2.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        n3.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        n4.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        n5.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        n6.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
+        n7.GetComponent<Seleccion_y_Union>().turnController = this.gameObject;
 
         e.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         n.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         a.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
         d.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n2.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n3.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n4.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n5.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n6.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
+        n7.GetComponent<Seleccion_y_Union>().msgGameObject = this.gameObject;
 
         e.GetComponent<Seleccion_y_Union>().owner = 1;
         n.GetComponent<Seleccion_y_Union>().owner = 2;
         a.GetComponent<Seleccion_y_Union>().owner = 3;
         d.GetComponent<Seleccion_y_Union>().owner = 4;
+        n2.GetComponent<Seleccion_y_Union>().owner = 0;
+        n3.GetComponent<Seleccion_y_Union>().owner = 0;
+        n4.GetComponent<Seleccion_y_Union>().owner = 0;
+        n5.GetComponent<Seleccion_y_Union>().owner = 0;
+        n6.GetComponent<Seleccion_y_Union>().owner = 0;
+        n7.GetComponent<Seleccion_y_Union>().owner = 0;
 
         e.GetComponent<Seleccion_y_Union>().identifier = 0;
         n.GetComponent<Seleccion_y_Union>().identifier = 1;
         a.GetComponent<Seleccion_y_Union>().identifier = 2;
         d.GetComponent<Seleccion_y_Union>().identifier = 3;
+        n2.GetComponent<Seleccion_y_Union>().identifier = 4;
+        n3.GetComponent<Seleccion_y_Union>().identifier = 5;
+        n4.GetComponent<Seleccion_y_Union>().identifier = 6;
+        n5.GetComponent<Seleccion_y_Union>().identifier = 7;
+        n6.GetComponent<Seleccion_y_Union>().identifier = 8;
+        n7.GetComponent<Seleccion_y_Union>().identifier = 9;
 
         nodos.Add(e);
         nodos.Add(n);
         nodos.Add(a);
         nodos.Add(d);
+        nodos.Add(n2);
+        nodos.Add(n3);
+        nodos.Add(n4);
+        nodos.Add(n5);
+        nodos.Add(n6);
+        nodos.Add(n7);
 
         defeated = new List<bool> { false, false, false, false }; // si saber quien pierde
     }
@@ -95,7 +133,9 @@ public class Info : MonoBehaviour
             data.turnController = this.gameObject;
             data.msgGameObject = this.gameObject;
             nodos.Add(nodoActivo);
-            
+            Debug.Log(nodo.points + " Nodo Points");
+            Debug.Log(data.points + " Data Points");
+
 
             for (int j = 0; j < data.total_nodes; j++)
             {
@@ -109,19 +149,21 @@ public class Info : MonoBehaviour
             for (int j = 0; j < data.total_nodes; j++)
             {
                 data.objectives.Add(null);
-                if (nodosIngresados[i].objectives.Count <= j)
-                {
-                    continue;
-                }
-                else
-                {
-                    Debug.Log("JJJJJ " + j);
-                    Debug.Log("nodos ingresados "+ nodosIngresados[i]);
-                    Debug.Log("objetivos "+ nodosIngresados[i].objectives[j]);
-                    Debug.Log("nodos ingresados " + nodos[nodosIngresados[i].objectives[j]]);
-                    Debug.Log("nodos ingresados " + data.objectives.Count);
-                    data.objectives[i] = nodos[nodosIngresados[i].objectives[j]];
-                }
+                data.unions.Add(null);
+                try {
+                    if (nodosIngresados[i].objectives[j] < j)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        Debug.Log(data.objectives.Count + " i " + i + "aaa " + nodosIngresados[i].objectives[j]);
+                        data.objectives[i] = nodos[nodosIngresados[i].objectives[j]];
+                        Seleccion_y_Union.first = nodos[i];
+                        data.objectives[i].GetComponent<Seleccion_y_Union>().ArrowCreation(j, data, Seleccion_y_Union.first);
+                        Seleccion_y_Union.first = null;
+                    }
+                } catch { continue; }
             }
         }
     }
