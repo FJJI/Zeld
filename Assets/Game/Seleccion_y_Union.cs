@@ -30,15 +30,14 @@ public class Seleccion_y_Union : MonoBehaviour
 
     void CheckType()
     {
-        if (type == 3) // aumentamos la cantidad de nodos usables
-        {
-            total_nodes += 1;
-        }
         // Para crear los objetivos de cada uno
         for (int i = 0; i < total_nodes; i++)
         {
-            objectives.Add(null);
-            unions.Add(null);
+            if (i >= used_nodes)
+            {
+                objectives.Add(null);
+                unions.Add(null);
+            }
         }
     }
 
@@ -234,6 +233,8 @@ public class Seleccion_y_Union : MonoBehaviour
         #endregion
     }
 
+    void ArrowCreation() { 
+    }
     private void ChangeHP()
     {
         for (int i = 0; i < total_nodes; i++)
